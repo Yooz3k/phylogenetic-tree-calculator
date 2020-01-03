@@ -5,14 +5,19 @@ import pl.edu.pg.app.clusters.ClustersFamilyToGraphConverter;
 public class Application {
 
     public static void main(String[] args) {
+        System.out.println("***PHYLOGENETIC ROOTED TREE CALCULATOR***\n");
+
         if (args.length == 0) {
             System.out.println("Nie wybrano żadnej akcji!");
             return;
         }
 
-        String firstArg = args[0].toLowerCase();
+        chooseOption(args[0].toLowerCase());
+    }
+
+    private static void chooseOption(String arg) {
         //Pozostałe elementy jako kolejne case'y
-        switch (firstArg) {
+        switch (arg) {
             case "help":
                 System.out.println(getHelp());
                 break;
