@@ -96,6 +96,17 @@ public class Cluster
         return m_Id;
     }
 
+    public boolean IsTerminal()
+    {
+        return m_IsTerminal;
+    }
+
+    public String GetLabel()
+    {
+        assert( m_IsTerminal );
+        return m_Label;
+    }
+
     public List<Cluster> GetClusters()
     {
         return m_Clusters;

@@ -1,5 +1,8 @@
 package pl.edu.pg.app.consensus;
 
+import org.graphstream.graph.Graph;
+import org.graphstream.ui.view.Viewer;
+import pl.edu.pg.app.converter.ClusterToGraphConverter;
 import pl.edu.pg.app.converter.GraphToClusterConverter;
 import pl.edu.pg.app.io.GraphLoader;
 import pl.edu.pg.app.struct.Cluster;
@@ -27,6 +30,9 @@ public class ConsensusFinder
         Cluster consensusTree = consensusFinder.FindConsensus( trees );
 
         System.out.println( "Consensus tree: " + consensusTree );
+
+        // Display consensus tree
+        new ClusterToGraphConverter().Convert( consensusTree ).display();
     }
 
     private List<String> ParseArguments( List<String> arguments )
