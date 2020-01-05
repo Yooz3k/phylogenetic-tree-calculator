@@ -9,33 +9,54 @@ import java.util.stream.Collectors;
 
 public class ConsensusFinder
 {
-    public static void Execute( List<String> treeFilenames )
-    {
-        GraphToClusterConverter graphConverter = new GraphToClusterConverter();
+    private float m_Threshold = 0.5f;
 
-        List<Cluster> trees = treeFilenames.parallelStream()
+    public static void Execute( List<String> arguments )
+    {
+        ConsensusFinder consensusFinder = new ConsensusFinder();
+
+        // Process arguments and return unparsed list
+        arguments = consensusFinder.ParseArguments( arguments );
+
+        GraphToClusterConverter graphConverter = new GraphToClusterConverter();
+        List<Cluster> trees = arguments.parallelStream()
                 .map( GraphLoader::load )
                 .map( graphConverter::convert )
                 .collect( Collectors.toList() );
 
-        ConsensusFinder consensusFinder = new ConsensusFinder();
-
-        Cluster consensusTree = consensusFinder.FindMajorityConsensus( trees );
+        Cluster consensusTree = consensusFinder.FindConsensus( trees );
 
         System.out.println( "Consensus tree: " + consensusTree );
     }
 
-    public Cluster FindStrictConsensus( List<Cluster> trees )
+    private List<String> ParseArguments( List<String> arguments )
     {
-        return FindConsensus( trees, 1.0f );
+        boolean allArgumentsProcessed = false;
+
+        ListIterator<String> argumentIterator = arguments.listIterator();
+        while( !allArgumentsProcessed && argumentIterator.hasNext() )
+        {
+            switch( argumentIterator.next() )
+            {
+                case "-threshold":
+                    m_Threshold = Float.parseFloat( argumentIterator.next() );
+                    break;
+
+                case "-strict":
+                    m_Threshold = 1.0f;
+                    break;
+
+                default:
+                    allArgumentsProcessed = true;
+                    break;
+            }
+        }
+
+        // Return unprocessed arguments
+        return arguments.subList( argumentIterator.nextIndex(), arguments.size() );
     }
 
-    public Cluster FindMajorityConsensus( List<Cluster> trees )
-    {
-        return FindConsensus( trees, 0.5f );
-    }
-
-    public Cluster FindConsensus( List<Cluster> trees, float threshold )
+    private Cluster FindConsensus( List<Cluster> trees )
     {
         Map<Cluster, Integer> counts = CountClusters( trees );
         Map<Cluster, Float> shares = ComputeShares( counts, trees.size() );
@@ -51,7 +72,7 @@ public class ConsensusFinder
             Cluster cluster = entry.getKey();
             float share = entry.getValue();
 
-            if( share < threshold )
+            if( share < m_Threshold )
             {
                 // Remove the node if share is below threshold
                 consensusTree.Remove( cluster );
@@ -80,12 +101,12 @@ public class ConsensusFinder
         {
             List<Cluster> treeClusters = tree.GetAllClusters();
 
-            // Iterate over all clades in current tree
+            // Iterate over all clusters in current tree
             for( Cluster candidate : candidateClusters )
             {
                 if( treeClusters.contains( candidate ) )
                 {
-                    // Tree contains candidate clade
+                    // Tree contains candidate cluster
                     counts.replace( candidate, 1 + counts.get( candidate ) );
                 }
             }
@@ -108,7 +129,7 @@ public class ConsensusFinder
     {
         Map<Cluster, Float> shares = new HashMap<>();
 
-        // Compute share of each clade
+        // Compute share of each cluster
         counts.forEach( ( cluster, count ) ->
                 shares.put( cluster, ( float ) count / numTrees ) );
 

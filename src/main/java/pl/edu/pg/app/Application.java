@@ -45,8 +45,11 @@ public class Application {
 
     private static String getHelp() {
         return "Dostępne akcje:\n"
-                + "-clusters: zamiana \"rodziny zgodnych klastrów\" do postaci drzewa\n"
-                + "-consensus: wyznaczanie drzewa konsensusu dla zadanego zbioru drzew\n"
+                + "-clusters                        Zamiana \"rodziny zgodnych klastrów\" do postaci drzewa\n"
+                + "-consensus [options] <file>...   Wyznaczanie drzewa konsensusu dla zadanego zbioru drzew\n"
+                + "   Options:\n"
+                + "   -threshold <x>                Tolerancja przy wyznaczaniu drzewa konsensusus [domyślnie: 0.5]\n"
+                + "   -strict                       Wyznaczanie drzewa pełnego konsensusu\n"
                 //Tutaj proponuję dopisywać info o kolejnych funkcjonalnościach
                 + "...inne opcje...\n";
     }
