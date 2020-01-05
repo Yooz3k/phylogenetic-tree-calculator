@@ -67,6 +67,7 @@ public class TreeToClustersFamilyConverter {
     private AdjacencyList loadTreeFromFile(String filename) {
         String path = GraphLoader.getFilePath(filename);
         Graph graph = GraphLoader.load(path);
+        //graph.display();
 
         GraphToAdjListConverter converter = new GraphToAdjListConverter();
         return converter.convert(graph);
