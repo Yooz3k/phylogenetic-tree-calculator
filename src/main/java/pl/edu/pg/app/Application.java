@@ -2,6 +2,9 @@ package pl.edu.pg.app;
 
 import pl.edu.pg.app.clusters.ClustersFamilyToGraphConverter;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Application {
 
     public static void main(String[] args) {
@@ -12,18 +15,21 @@ public class Application {
             return;
         }
 
-        chooseOption(args[0].toLowerCase());
+        chooseOption(Arrays.asList(args));
     }
 
-    private static void chooseOption(String arg) {
+    private static void chooseOption(List<String> args) {
+        String option = args.get(0).toLowerCase();
         //Pozostałe elementy jako kolejne case'y
-        switch (arg) {
+        switch (option) {
             case "help":
                 System.out.println(getHelp());
                 break;
-            case "-clusters":
+            case "-clusterstograph":
                 ClustersFamilyToGraphConverter clusters = new ClustersFamilyToGraphConverter();
-                clusters.execute();
+                //Drugim elementem listy argumentów powinien być plik ze zbiorami wierzchołków
+                String clustersFilename = args.get(1);
+                clusters.convert(clustersFilename);
                 break;
             default:
                 System.out.println("Nie rozpoznano polecenia!");
