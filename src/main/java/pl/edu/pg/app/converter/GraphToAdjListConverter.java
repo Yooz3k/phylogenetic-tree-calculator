@@ -4,7 +4,7 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import pl.edu.pg.app.struct.AdjacencyList;
 
-public class GraphToAdjListConverter extends GraphConverter<AdjacencyList> {
+public class GraphToAdjListConverter implements GraphConverter<AdjacencyList> {
 
     @Override
     public AdjacencyList convert(Graph graph) {

@@ -15,7 +15,7 @@ public class FileSourceDemo {
     private static final String FILENAME = "graph_with_attributes.xml";
 
     public static void main(String[] args) throws URISyntaxException {
-        String filepath = getFilePath();
+        String filepath = getFilePath( FILENAME );
 
         Graph g = GraphLoader.load(filepath);
 
@@ -29,8 +29,8 @@ public class FileSourceDemo {
         g.display();
     }
 
-    private static String getFilePath() throws URISyntaxException {
-        URL res = FileSourceDemo.class.getClassLoader().getResource(FILENAME);
+    protected static String getFilePath( String path ) throws URISyntaxException {
+        URL res = FileSourceDemo.class.getClassLoader().getResource( path );
         File file = Paths.get(res.toURI()).toFile();
         return file.getAbsolutePath();
     }
