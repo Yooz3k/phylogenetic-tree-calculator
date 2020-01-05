@@ -1,6 +1,7 @@
 package pl.edu.pg.app;
 
-import pl.edu.pg.app.clusters.ClustersFamilyToGraphConverter;
+import pl.edu.pg.app.clusters.ClustersFamilyToTreeConverter;
+import pl.edu.pg.app.clusters.TreeToClustersFamilyConverter;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,11 +26,17 @@ public class Application {
             case "help":
                 System.out.println(getHelp());
                 break;
-            case "-clusterstograph":
-                ClustersFamilyToGraphConverter clusters = new ClustersFamilyToGraphConverter();
+            case "-clusterstotree":
+                ClustersFamilyToTreeConverter toTreeConverter = new ClustersFamilyToTreeConverter();
                 //Drugim elementem listy argumentów powinien być plik ze zbiorami wierzchołków
                 String clustersFilename = args.get(1);
-                clusters.convert(clustersFilename);
+                toTreeConverter.convert(clustersFilename);
+                break;
+            case "-treetoclusters":
+                TreeToClustersFamilyConverter toClustersConverter = new TreeToClustersFamilyConverter();
+                //Drugim elementem listy argumentów powinien być plik z drzewem
+                String treeFilename = args.get(1);
+                toClustersConverter.convert(treeFilename);
                 break;
             default:
                 System.out.println("Nie rozpoznano polecenia!");
