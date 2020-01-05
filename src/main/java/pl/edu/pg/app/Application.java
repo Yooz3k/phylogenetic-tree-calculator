@@ -2,8 +2,8 @@ package pl.edu.pg.app;
 
 import pl.edu.pg.app.clusters.ClustersFamilyToTreeConverter;
 import pl.edu.pg.app.clusters.TreeToClustersFamilyConverter;
-import pl.edu.pg.app.view.TreeViewer;
 import pl.edu.pg.app.consensus.ConsensusFinder;
+import pl.edu.pg.app.view.TreeViewer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -51,13 +51,13 @@ public class Application {
 
     private static String getHelp() {
         return "Dostępne akcje:\n"
-                + "-clusters                        Zamiana \"rodziny zgodnych klastrów\" do postaci drzewa\n"
+                + "-show <file>                     Wyświetlenie drzewa\n"
                 + "-consensus [options] <file>...   Wyznaczanie drzewa konsensusu dla zadanego zbioru drzew\n"
                 + "   Options:\n"
                 + "   -threshold <x>                Tolerancja przy wyznaczaniu drzewa konsensusus [domyślnie: 0.5]\n"
                 + "   -strict                       Wyznaczanie drzewa pełnego konsensusu\n"
-                + "-clustersToTree: zamiana \"rodziny zgodnych klastrów\" do postaci drzewa\n"
-                + "-treeToClusters: zamiana drzewa do postaci \"rodziny zgodnych klastrów\"\n"
+                + "-clustersToTree <file>           Zamiana \"rodziny zgodnych klastrów\" do postaci drzewa\n"
+                + "-treeToClusters <file>           Zamiana drzewa do postaci \"rodziny zgodnych klastrów\"\n"
                 //Tutaj proponuję dopisywać info o kolejnych funkcjonalnościach
                 + "...inne opcje...\n";
     }
