@@ -60,23 +60,9 @@ public class ClustersFamilyToTreeConverter {
             childrenPerParents.put(nodeName, cluster);
         });
 
-        LinkedHashMap<String, List<String>> childrenPerParentSortedBySizeDesc =
-                childrenPerParents.entrySet().stream()
-                        .sorted((e1, e2) -> Integer.compare(e2.getValue().size(), e1.getValue().size()))
-                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
-                                (e1, e2) -> e1, LinkedHashMap::new));
+        LinkedHashMap<String, List<String>> childrenPerParentSortedBySizeDesc = sortBySizeDescending(childrenPerParents);
 
-        Map<String, List<String>> mapWithFilteredChildren = new LinkedHashMap<>();
-        for (Map.Entry<String, List<String>> childrenPerParent : childrenPerParentSortedBySizeDesc.entrySet()) {
-            List<String> currentChildren = new ArrayList<>(childrenPerParent.getValue());
-            for (Map.Entry<String, List<String>> childrenPerAnotherParent : childrenPerParentSortedBySizeDesc.entrySet()) {
-                if (!childrenPerParent.equals(childrenPerAnotherParent) && currentChildren.containsAll(childrenPerAnotherParent.getValue())) {
-                    currentChildren.removeAll(childrenPerAnotherParent.getValue());
-                    currentChildren.add(childrenPerAnotherParent.getKey());
-                }
-            }
-            mapWithFilteredChildren.put(childrenPerParent.getKey(), currentChildren);
-        }
+        Map<String, List<String>> mapWithFilteredChildren = filterChildren(childrenPerParentSortedBySizeDesc);
 
         //Teraz możemy dodać krawędzi do drzewa na podstawie mapy mapWithFilteredChildren
         mapWithFilteredChildren.entrySet().forEach(entry -> {
@@ -84,8 +70,8 @@ public class ClustersFamilyToTreeConverter {
                 graph.addEdge(getEdgeName(), entry.getKey(), value, true);
             });
         });
-
         graph.getNodeSet().forEach(node -> node.addAttribute("label", node.getId()));
+
         graph.display();
 
         System.out.println(clusters);
@@ -152,5 +138,27 @@ public class ClustersFamilyToTreeConverter {
 
     private String getEdgeName() {
         return String.valueOf(edgeIndex++);
+    }
+
+    private LinkedHashMap<String, List<String>> sortBySizeDescending(Map<String, List<String>> childrenPerParents) {
+        return childrenPerParents.entrySet().stream()
+                .sorted((e1, e2) -> Integer.compare(e2.getValue().size(), e1.getValue().size()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                        (e1, e2) -> e1, LinkedHashMap::new));
+    }
+
+    private Map<String, List<String>> filterChildren(Map<String, List<String>> childrenPerParentSortedBySizeDesc) {
+        Map<String, List<String>> mapWithFilteredChildren = new LinkedHashMap<>();
+        for (Map.Entry<String, List<String>> childrenPerParent : childrenPerParentSortedBySizeDesc.entrySet()) {
+            List<String> currentChildren = new ArrayList<>(childrenPerParent.getValue());
+            for (Map.Entry<String, List<String>> childrenPerAnotherParent : childrenPerParentSortedBySizeDesc.entrySet()) {
+                if (!childrenPerParent.equals(childrenPerAnotherParent) && currentChildren.containsAll(childrenPerAnotherParent.getValue())) {
+                    currentChildren.removeAll(childrenPerAnotherParent.getValue());
+                    currentChildren.add(childrenPerAnotherParent.getKey());
+                }
+            }
+            mapWithFilteredChildren.put(childrenPerParent.getKey(), currentChildren);
+        }
+        return mapWithFilteredChildren;
     }
 }
