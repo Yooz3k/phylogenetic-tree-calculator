@@ -1,6 +1,9 @@
 package pl.edu.pg.app;
 
 import pl.edu.pg.app.clusters.ClustersFamilyToGraphConverter;
+import pl.edu.pg.app.consensus.ConsensusFinder;
+
+import java.util.List;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +34,9 @@ public class Application {
                 String clustersFilename = args.get(1);
                 clusters.convert(clustersFilename);
                 break;
+            case "-consensus":
+                ConsensusFinder.Execute( args.subList( 1, args.size() ) );
+                break;
             default:
                 System.out.println("Nie rozpoznano polecenia!");
                 break;
@@ -40,6 +46,7 @@ public class Application {
     private static String getHelp() {
         return "Dostępne akcje:\n"
                 + "-clusters: zamiana \"rodziny zgodnych klastrów\" do postaci drzewa\n"
+                + "-consensus: wyznaczanie drzewa konsensusu dla zadanego zbioru drzew\n"
                 //Tutaj proponuję dopisywać info o kolejnych funkcjonalnościach
                 + "...inne opcje...\n";
     }
