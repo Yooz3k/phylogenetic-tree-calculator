@@ -1,5 +1,6 @@
 package pl.edu.pg.app.struct;
 
+import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Map;
@@ -36,6 +37,10 @@ public class AdjacencyList {
 
     public Set<Integer> get(int key) {
         return adjacentNodesPerNode.get(key);
+    }
+
+    public int getSize() {
+        return adjacentNodesPerNode.size();
     }
 
     @Override

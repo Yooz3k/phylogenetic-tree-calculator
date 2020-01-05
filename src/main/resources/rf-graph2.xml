@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+     http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+    <graph id="G" edgedefault="undirected">
+        <node id="A"/>
+        <node id="B"/>
+        <node id="C"/>
+        <node id="D"/>
+        <node id="E"/>
+        <node id="F"/>
+        <node id="G"/>
+        <node id="H"/>
+        <node id="I"/>
+        <node id="J"/>
+        <node id="K"/>
+        <node id="0"/>
+        <node id="1"/>
+        <node id="2"/>
+        <node id="3"/>
+        <node id="4"/>
+        <node id="5"/>
+        <edge id="e0" source="A" target="0"/>
+        <edge id="e1" source="B" target="0"/>
+        <edge id="e2" source="0" target="1"/>
+        <edge id="e3" source="1" target="2"/>
+        <edge id="e4" source="C" target="1"/>
+        <edge id="e5" source="D" target="2"/>
+        <edge id="e6" source="E" target="2"/>
+        <edge id="e7" source="0" target="3"/>
+        <edge id="e8" source="3" target="4"/>
+        <edge id="e9" source="4" target="5"/>
+        <edge id="e10" source="3" target="G"/>
+        <edge id="e11" source="4" target="H"/>
+        <edge id="e12" source="4" target="F"/>
+        <edge id="e13" source="5" target="I"/>
+        <edge id="e14" source="5" target="J"/>
+        <edge id="e15" source="2" target="K"/>
+    </graph>
+</graphml>
