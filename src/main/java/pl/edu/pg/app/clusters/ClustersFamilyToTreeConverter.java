@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -42,10 +43,11 @@ public class ClustersFamilyToTreeConverter {
                 .sorted(Comparator.comparingInt(List::size))
                 .collect(Collectors.toList());
 
-        //Klastry jednoelementowe to liście - dodajemy je jako węzły do drzewa
+        //Dodajemy wszystkie liście jako wierzchołki
         clusters.stream()
-                .filter(cluster -> cluster.size() == 1)
-                .forEach(cluster -> graph.addNode(cluster.get(0)));
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet())
+                .forEach(graph::addNode);
 
         Map<String, List<String>> childrenPerParents = new HashMap<>();
 
