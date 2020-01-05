@@ -5,36 +5,29 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
 import pl.edu.pg.app.struct.AdjacencyList;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import static pl.edu.pg.app.metric.GraphLabel.*;
 import static pl.edu.pg.app.metric.GraphUtils.*;
 
-public class Rf {
+public class GraphAnalyzer {
 
     private Graph g;
 
     private int leafsCount = 0;
     private Node root;
 
-    public Rf(Graph g, AdjacencyList adj) {
+    public GraphAnalyzer(Graph g) {
         this.g = g;
     }
 
-    public void count() {
+    public GraphAnalyzerResult analyzeAndSetAttributes() {
         markNodesAsLeafsAndRoot();
         markLeafEdgesAsTrivialPartitions();
         markEdgesAsPartitions();
-
-        List<Node> nodesInPostorder = new Bipartitioner(root, leafsCount).getNodesInPostOrderAndSetBipartitions(g);
-
-
-        g.display();
+        return new GraphAnalyzerResult(leafsCount, root);
     }
-
-
 
     private void markEdgesAsPartitions() {
         for (Edge edge : g.getEdgeSet()) {
@@ -57,7 +50,7 @@ public class Rf {
     private void markNodesAsLeafsAndRoot() {
         for (int i = 0; i < g.getNodeCount(); i++) {
             final Node node = g.getNode(i);
-            if (getNodeChildren(node).isEmpty()) {
+            if (node.getDegree() == 1) {
                 node.setAttribute(LABEL.getText(), "leaf " + i);
                 node.setAttribute(LEAF.getText(), true);
                 leafsCount++;

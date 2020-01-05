@@ -10,6 +10,7 @@ public enum GraphLabel {
     LEAF("leaf"),
     ROOT("root"),
     PARTITION("partition"),
+    BIT_PARTITION("bit-partition"),
     VISITED("VISITED"),;
 
     private String text;

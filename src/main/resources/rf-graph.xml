@@ -3,7 +3,7 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
      http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
-  <graph id="G" edgedefault="undirected">
+  <graph id="G" edgedefault="directed">
     <node id="A"/>
     <node id="B"/>
     <node id="C"/>
@@ -12,12 +12,12 @@
     <node id="0"/>
     <node id="1"/>
     <node id="2"/>
-    <edge id="e0" source="A" target="0"/>
-    <edge id="e1" source="B" target="0"/>
+    <edge id="e0" source="0" target="A"/>
+    <edge id="e1" source="0" target="B"/>
     <edge id="e2" source="0" target="1"/>
     <edge id="e3" source="1" target="2"/>
-    <edge id="e4" source="C" target="1"/>
-    <edge id="e5" source="D" target="2"/>
-    <edge id="e6" source="E" target="2"/>
+    <edge id="e4" source="1" target="C"/>
+    <edge id="e5" source="2" target="D"/>
+    <edge id="e6" source="2" target="E"/>
   </graph>
 </graphml>
