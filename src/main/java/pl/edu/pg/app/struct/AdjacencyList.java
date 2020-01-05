@@ -11,11 +11,11 @@ import java.util.stream.Collectors;
 @Setter
 public class AdjacencyList {
 
-    private TreeMap<Integer, TreeSet<Integer>> adjacentNodesPerNode = new TreeMap<>();
+    public TreeMap<String, TreeSet<String>> adjacentNodesPerNode = new TreeMap<>();
 
-    public void add(int edge1, int edge2) {
-        TreeSet<Integer> adjacentToEdge1 = adjacentNodesPerNode.get(edge1);
-        TreeSet<Integer> adjacentToEdge2 = adjacentNodesPerNode.get(edge2);
+    public void add(String edge1, String edge2, boolean directed) {
+        TreeSet<String> adjacentToEdge1 = adjacentNodesPerNode.get(edge1);
+        TreeSet<String> adjacentToEdge2 = adjacentNodesPerNode.get(edge2);
 
         if (adjacentToEdge1 == null) {
             adjacentToEdge1 = new TreeSet<>();
@@ -26,15 +26,19 @@ public class AdjacencyList {
         if (adjacentToEdge2 == null) {
             adjacentToEdge2 = new TreeSet<>();
         }
-        adjacentToEdge2.add(edge1);
+
+        if (!directed) {
+            adjacentToEdge2.add(edge1);
+        }
+
         adjacentNodesPerNode.put(edge2, adjacentToEdge2);
     }
 
-    public void put(int key, TreeSet<Integer> value) {
+    public void put(String key, TreeSet<String> value) {
         adjacentNodesPerNode.put(key, value);
     }
 
-    public Set<Integer> get(int key) {
+    public Set<String> get(String key) {
         return adjacentNodesPerNode.get(key);
     }
 
@@ -42,7 +46,7 @@ public class AdjacencyList {
     public String toString() {
         StringBuilder sb = new StringBuilder();
 
-        for (Map.Entry<Integer, TreeSet<Integer>> node : adjacentNodesPerNode.entrySet()) {
+        for (Map.Entry<String, TreeSet<String>> node : adjacentNodesPerNode.entrySet()) {
             String adjacentNodes = node.getValue().stream()
                     .map(String::valueOf)
                     .collect(Collectors.joining(", "));
