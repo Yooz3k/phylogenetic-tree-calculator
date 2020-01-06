@@ -10,6 +10,6 @@ public class CuttingTreeDemo {
     private static final String FILENAME = "rf-graph-root.xml";
 
     public static void main(String[] args) {
-        new CuttingOffLeafs().cut(FILENAME, new HashSet<>(Arrays.asList("F", "G", "D", "B")));
+        new CuttingOffLeafs().cut(FILENAME, new HashSet<>(Arrays.asList("B", "G")));
     }
 }

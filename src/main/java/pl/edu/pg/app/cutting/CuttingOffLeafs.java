@@ -6,29 +6,22 @@ import org.graphstream.graph.Node;
 import pl.edu.pg.app.metric.GraphUtils;
 
 import java.net.URISyntaxException;
-import java.util.Optional;
+import java.util.HashSet;
 import java.util.Set;
 
 public class CuttingOffLeafs {
+
+    private Node root;
 
     public void cut(String filename, Set<String> nodeIds) {
         try {
             displayInitialGraph(filename);
             Graph g = GraphUtils.loadGraph(filename);
             throwExceptionIfIncorrectData(g, nodeIds);
-            Optional<Node> root = findRoot(g);
 
-            g.getNodeSet().forEach(n -> {
-                if (GraphUtils.isLeaf(n) && !nodeIds.contains(n.getId())) {
-                    g.removeNode(n);
-                }
-            });
-
-            if (root.isPresent()) {
-                inOrderCutOffNodes(root.get(), null, nodeIds, g);
-            } else {
-
-            }
+            root = findRoot(g);
+            removeLeafs(g, nodeIds);
+            removeUnnecesaryNodes(nodeIds, g);
 
             g.display();
         } catch (URISyntaxException e) {
@@ -36,6 +29,36 @@ public class CuttingOffLeafs {
             e.printStackTrace();
         }
 
+    }
+
+    private void removeUnnecesaryNodes(Set<String> nodeIds, Graph g) {
+        if (root != null) {
+            postOrderCutOffNodes(root, null, nodeIds, g);
+        } else {
+            postOrderCutOffNodes(g.getNodeSet().stream().filter(n -> !GraphUtils.isLeaf(n)).findFirst().get(), null, nodeIds, g);
+        }
+        if (g.getNodeSet().size() == 2 && nodeIds.size() == 1) {
+            Node nodeToRemove = null;
+            for (Node n : g.getNodeSet()) {
+                if (!n.getId().equals(nodeIds.iterator().next())) {
+                    nodeToRemove = n;
+                }
+            }
+            g.removeNode(nodeToRemove);
+        }
+    }
+
+    private void removeLeafs(Graph g, Set<String> nodeIds) {
+        final Set<Node> nodesToRemove = new HashSet<>();
+        for (Node n : g.getNodeSet()) {
+            if (GraphUtils.isLeaf(n) && !nodeIds.contains(n.getId())) {
+                nodesToRemove.add(n);
+            }
+        }
+        for (Node n : nodesToRemove) {
+            g.removeNode(n);
+            System.out.println("Removed node " + n.getId());
+        }
     }
 
     private void throwExceptionIfIncorrectData(Graph g, Set<String> nodeIds) {
@@ -46,53 +69,56 @@ public class CuttingOffLeafs {
         }
     }
 
-    private void inOrderCutOffNodes(Node node, Node previousNode, Set<String> nodeIds, Graph graph) {
-        GraphUtils.incrementGoValue(node);
+    private void postOrderCutOffNodes(Node node, Node previousNode, Set<String> nodeIds, Graph graph) {
         System.out.println("Node: " + node.getId());
+        for (Edge e : node.getEdgeSet()) {
+            final Node secondNodeFromEdge = GraphUtils.getSecondNodeFromEdge(node, e);
+            if (!secondNodeFromEdge.equals(previousNode)) {
+                System.out.println("- Node. Going to second node " + secondNodeFromEdge.getId());
+                postOrderCutOffNodes(secondNodeFromEdge, node, nodeIds, graph);
+            }
+        }
+
+        System.out.println(" - Node: " + node.getId());
+
         if (node.getDegree() == 1) {
             if (!nodeIds.contains(node.getId())) {
                 final Node secondNode = GraphUtils.getSecondNodeFromEdge(node, node.getEdge(0));
+//                inOrderCutOffNodes(secondNode, node, nodeIds, graph);
                 graph.removeNode(node);
                 System.out.println("- Leaf. Removing from graph, going to " + secondNode.getId());
-                inOrderCutOffNodes(secondNode, node, nodeIds, graph);
             } else {
                 System.out.println("- Leaf to preserve. Going back.");
             }
         } else if (isNodeWithTwoEdgesButNoLeaf(node, previousNode)) {
-            Node node1 = GraphUtils.getSecondNodeFromEdge(node, node.getEdge(0));
-            Node node2 = GraphUtils.getSecondNodeFromEdge(node, node.getEdge(1));
-            System.out.println("- Node. Degree = 2, no leafs. Removing node from graph, making connection between " + node1.getId() + " oraz " + node2.getId());
-            graph.addEdge("e" + node1.getId() + "-" + node2.getId(), node1, node2, false);
-            graph.removeNode(node);
-            if (node1.equals(previousNode)) {
-                System.out.println(" - Going to next merged node " + node2.getId());
-                inOrderCutOffNodes(node2, node1, nodeIds, graph);
-            } else {
-                System.out.println(" - Going to next merged node " + node1.getId());
-                inOrderCutOffNodes(node1, node2, nodeIds, graph);
-            }
-        } else {
-            for (Edge edge : node.getEdgeSet()) {
-                final Node secondNode = GraphUtils.getSecondNodeFromEdge(node, edge);
-                if (GraphUtils.getGoValue(secondNode) == 0) {
-                    System.out.println("- Node. Going to second node " + secondNode.getId());
-                    inOrderCutOffNodes(secondNode, node, nodeIds, graph);
-                } else {
-                    System.out.println("- Node, already seen.");
-                }
-            }
+            removeNodeAndMergeHisNeighbours(node, previousNode, nodeIds, graph);
         }
+    }
+
+    private void removeNodeAndMergeHisNeighbours(Node node, Node previousNode, Set<String> nodeIds, Graph graph) {
+        Node node1 = GraphUtils.getSecondNodeFromEdge(node, node.getEdge(0));
+        Node node2 = GraphUtils.getSecondNodeFromEdge(node, node.getEdge(1));
+        System.out.println("- Node. Degree = 2, no leafs. Removing node from graph, making connection between " + node1.getId() + " oraz " + node2.getId());
+        graph.addEdge("e" + node1.getId() + "-" + node2.getId(), node1, node2, false);
+        graph.removeNode(node);
     }
 
     private boolean isNodeWithTwoEdgesButNoLeaf(Node node, Node previousNode) {
         if (node.getDegree() != 2) {
             return false;
         }
+        int leafsFound = 0;
         for (Edge edge : node.getEdgeSet()) {
             final Node secondNode = GraphUtils.getSecondNodeFromEdge(node, edge);
             if (GraphUtils.isLeaf(secondNode)) {
-                return false;
+                leafsFound++;
             }
+        }
+        if (leafsFound > 1) {
+            return false;
+        }
+        if (root != null && root.equals(node)) {
+            return false;
         }
         return true;
     }
@@ -102,9 +128,9 @@ public class CuttingOffLeafs {
         gDis.display();
     }
 
-    private Optional<Node> findRoot(Graph g) {
+    private Node findRoot(Graph g) {
         return g.getNodeSet().stream()
                 .filter(n -> n.getDegree() == 2)
-                .findAny();
+                .findAny().orElse(null);
     }
 }
