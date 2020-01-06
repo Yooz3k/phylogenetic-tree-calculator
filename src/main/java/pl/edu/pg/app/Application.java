@@ -2,6 +2,7 @@ package pl.edu.pg.app;
 
 import pl.edu.pg.app.clusters.ClustersFamilyToTreeConverter;
 import pl.edu.pg.app.clusters.TreeToClustersFamilyConverter;
+import pl.edu.pg.app.compatibility.CompatibilityFinder;
 import pl.edu.pg.app.consensus.ConsensusFinder;
 import pl.edu.pg.app.view.TreeViewer;
 
@@ -43,6 +44,9 @@ public class Application {
             case "-consensus":
                 ConsensusFinder.Execute( args.subList( 1, args.size() ) );
                 break;
+            case "-compatibility":
+                CompatibilityFinder.Execute( args.subList( 1, args.size() ) );
+                break;
             default:
                 System.out.println("Nie rozpoznano polecenia!");
                 break;
@@ -58,6 +62,7 @@ public class Application {
                 + "   -strict                       Wyznaczanie drzewa pełnego konsensusu\n"
                 + "-clustersToTree <file>           Zamiana \"rodziny zgodnych klastrów\" do postaci drzewa\n"
                 + "-treeToClusters <file>           Zamiana drzewa do postaci \"rodziny zgodnych klastrów\"\n"
+                + "-compatibility <file>...         Wyznaczanie wspólnego rozszerzenia drzew\n"
                 //Tutaj proponuję dopisywać info o kolejnych funkcjonalnościach
                 + "...inne opcje...\n";
     }

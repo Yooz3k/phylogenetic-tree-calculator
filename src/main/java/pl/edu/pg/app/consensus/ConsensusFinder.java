@@ -1,7 +1,5 @@
 package pl.edu.pg.app.consensus;
 
-import org.graphstream.graph.Graph;
-import org.graphstream.ui.view.Viewer;
 import pl.edu.pg.app.converter.ClusterToGraphConverter;
 import pl.edu.pg.app.converter.GraphToClusterConverter;
 import pl.edu.pg.app.io.GraphLoader;

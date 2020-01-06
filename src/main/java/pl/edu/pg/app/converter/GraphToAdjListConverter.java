@@ -4,14 +4,18 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import pl.edu.pg.app.struct.AdjacencyList;
 
-public class GraphToAdjListConverter implements GraphConverter<AdjacencyList> {
+public class GraphToAdjListConverter implements GraphConverter<AdjacencyList<String>> {
 
     @Override
-    public AdjacencyList convert(Graph graph) {
-        AdjacencyList adjList = new AdjacencyList();
+    public AdjacencyList<String> convert(Graph graph) {
+        AdjacencyList<String> adjList = new AdjacencyList<>();
 
         for (Edge edge : graph.getEachEdge()) {
-            adjList.add(edge.getNode0().getId(), edge.getNode1().getId(), edge.isDirected());
+            String node0 = edge.getNode0().getId();
+            String node1 = edge.getNode1().getId();
+            adjList.AddNode( node0 );
+            adjList.AddNode( node1 );
+            adjList.AddEdge( node0, node1, edge.isDirected() );
         }
 
         return adjList;
