@@ -3,12 +3,8 @@ package pl.edu.pg.app.metric;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
-import pl.edu.pg.app.struct.AdjacencyList;
 
-import java.util.List;
-import java.util.Set;
-
-import static pl.edu.pg.app.metric.GraphLabel.*;
+import static pl.edu.pg.app.metric.GraphAttribute.*;
 import static pl.edu.pg.app.metric.GraphUtils.*;
 
 public class GraphAnalyzer {
@@ -51,17 +47,17 @@ public class GraphAnalyzer {
         for (int i = 0; i < g.getNodeCount(); i++) {
             final Node node = g.getNode(i);
             if (node.getDegree() == 1) {
-                node.setAttribute(LABEL.getText(), "leaf " + i);
+               appendLabelToElement(node, "leaf " + i);
                 node.setAttribute(LEAF.getText(), true);
                 leafsCount++;
             } else if (node.getDegree() == 2) {
                 node.setAttribute(ROOT.getText(), true);
-                node.setAttribute(LABEL.getText(), "ROOT");
+                appendLabelToElement(node, "ROOT");
                 node.setAttribute(LEAF.getText(), false);
                 node.addAttribute("ui.style", "fill-color: red;");
                 root = node;
             } else {
-                node.setAttribute(LABEL.getText(), i);
+                appendLabelToElement(node, String.valueOf(i));
                 node.setAttribute(LEAF.getText(), false);
             }
         }

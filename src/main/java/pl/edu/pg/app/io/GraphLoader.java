@@ -5,6 +5,7 @@ import org.graphstream.graph.implementations.DefaultGraph;
 import org.graphstream.stream.file.FileSource;
 import org.graphstream.stream.file.FileSourceFactory;
 import pl.edu.pg.app.Application;
+import pl.edu.pg.app.metric.GraphAttribute;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 
 public class GraphLoader {
 
-    public static Graph load(String filepath) {
+    public static Graph load(String filepath, boolean nameNodes) {
         Graph graph = new DefaultGraph("g");
 
         FileSource fs = null;
@@ -34,7 +35,16 @@ public class GraphLoader {
             }
         }
 
+        if (nameNodes) {
+            graph.getNodeSet().forEach(n -> n.setAttribute(GraphAttribute.LABEL.getText(), n.getId()));
+            graph.getEdgeSet().forEach(n -> n.setAttribute(GraphAttribute.LABEL.getText(), n.getId()));
+        }
+
         return graph;
+    }
+
+    public static Graph load(String filepath) {
+        return load(filepath, false);
     }
 
     public static List<Graph> loadMultiple(List<String> filenames) {

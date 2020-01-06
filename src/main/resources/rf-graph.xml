@@ -9,15 +9,15 @@
     <node id="C"/>
     <node id="D"/>
     <node id="E"/>
-    <node id="0"/>
-    <node id="1"/>
-    <node id="2"/>
-    <edge id="e0" source="0" target="A"/>
-    <edge id="e1" source="0" target="B"/>
-    <edge id="e2" source="0" target="1"/>
-    <edge id="e3" source="1" target="2"/>
-    <edge id="e4" source="1" target="C"/>
-    <edge id="e5" source="2" target="D"/>
-    <edge id="e6" source="2" target="E"/>
+    <node id="F"/>
+    <node id="G"/>
+    <node id="H"/>
+    <edge id="e0" source="F" target="A"/>
+    <edge id="e1" source="F" target="B"/>
+    <edge id="e2" source="F" target="G"/>
+    <edge id="e3" source="G" target="H"/>
+    <edge id="e4" source="G" target="C"/>
+    <edge id="e5" source="H" target="D"/>
+    <edge id="e6" source="H" target="E"/>
   </graph>
 </graphml>

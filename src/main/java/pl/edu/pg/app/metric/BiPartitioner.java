@@ -10,9 +10,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static pl.edu.pg.app.metric.GraphLabel.BIT_PARTITION;
-import static pl.edu.pg.app.metric.GraphLabel.LABEL;
-import static pl.edu.pg.app.metric.GraphLabel.LEAF;
+import static pl.edu.pg.app.metric.GraphAttribute.BIT_PARTITION;
+import static pl.edu.pg.app.metric.GraphUtils.appendLabelToElement;
+import static pl.edu.pg.app.metric.GraphUtils.getEdgeToParent;
 import static pl.edu.pg.app.metric.GraphUtils.getSecondNodeFromEdge;
 import static pl.edu.pg.app.metric.GraphUtils.isLeaf;
 
@@ -48,30 +48,39 @@ public class BiPartitioner {
             postOrder(child, nodes, partitions);
         }
         nodes.add(currentNode);
-        setNodeBiPartition(currentNode, nodes, children, partitions);
+        setEdgeBiPartition(currentNode, children, partitions);
     }
 
-    private void setNodeBiPartition(Node currentNode, List<Node> nodes, List<Node> children, Set<String> partitions) {
+    private void setEdgeBiPartition(Node currentNode, List<Node> children, Set<String> partitions) {
         if (isLeaf(currentNode)) {
             final String leafBiPartition = getLeafBiPartition(leafNumber++);
-            currentNode.setAttribute(LABEL.getText(), leafBiPartition);
+            appendLabelToElement(currentNode, leafBiPartition);
             currentNode.setAttribute(BIT_PARTITION.getText(), leafBiPartition);
-        } else {
-            final String nonLeafBiPartition = getNonLeafBiPartition(children);
-            currentNode.setAttribute(LABEL.getText(), nonLeafBiPartition);
-            currentNode.setAttribute(BIT_PARTITION.getText(), nonLeafBiPartition);
+        } else if (root == null || currentNode.getIndex() != root.getIndex()) {
+            final String nonLeafBiPartition = getNonLeafBiPartition(currentNode, children);
+            final Edge edgeToParent = getEdgeToParent(currentNode, children.get(0), children.get(1));
+            appendLabelToElement(edgeToParent, "part(" + nonLeafBiPartition + ")");
+            edgeToParent.setAttribute(BIT_PARTITION.getText(),  nonLeafBiPartition);
             partitions.add(nonLeafBiPartition);
         }
     }
 
-    private String getNonLeafBiPartition(List<Node> children) {
+    private String getNonLeafBiPartition(Node currentNode, List<Node> children) {
         String s = "";
-        String c1 = children.get(0).getAttribute(LABEL.getText());
-        String c2 = children.get(1).getAttribute(LABEL.getText());
+        String c1 = getBitPartitionFromNode(currentNode, children.get(0));
+        String c2 = getBitPartitionFromNode(currentNode, children.get(1));
         for (int i = 0; i < leafsCount; i++) {
             s += (c1.charAt(i) == '1' | c2.charAt(i) == '1') == Boolean.TRUE ? '1' : '0';
         }
         return s;
+    }
+
+    private String getBitPartitionFromNode(Node currentNode, Node childNode) {
+        if (isLeaf(childNode)) {
+            return childNode.getAttribute(BIT_PARTITION.getText());
+        } else {
+            return childNode.getEdgeFrom(currentNode.getIndex()).getAttribute(BIT_PARTITION.getText());
+        }
     }
 
     private String getLeafBiPartition(int indexInPostOrder) {

@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum GraphLabel {
+public enum GraphAttribute {
     LABEL("label"),
     LEAF("leaf"),
     ROOT("root"),

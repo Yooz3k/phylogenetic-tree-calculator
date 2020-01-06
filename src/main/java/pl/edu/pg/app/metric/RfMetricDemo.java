@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 
 public class RfMetricDemo {
     private static final String FILENAME = "rf-graph.xml";
-    private static final String FILENAME2 = "rf-graph-root2.xml";
+    private static final String FILENAME2 = "rf-graph-git.xml";
 
     public static void main(String[] args) throws URISyntaxException {
         Graph g = loadGraph(FILENAME);
@@ -28,7 +28,7 @@ public class RfMetricDemo {
 
     private static Graph loadGraph(String filename) throws URISyntaxException {
         String filepath = getFilePath(filename);
-        Graph g = GraphLoader.load(filepath);
+        Graph g = GraphLoader.load(filepath, true);
         GraphConverter<AdjacencyList> converter = new GraphToAdjListConverter();
         AdjacencyList adj = converter.convert(g);
         System.out.println("Adjacency list:\n" + adj.toString());
