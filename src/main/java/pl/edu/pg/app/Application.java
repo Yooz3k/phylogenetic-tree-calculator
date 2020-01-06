@@ -1,6 +1,9 @@
 package pl.edu.pg.app;
 
-import pl.edu.pg.app.clusters.ClustersFamilyToGraphConverter;
+import pl.edu.pg.app.clusters.ClustersFamilyToTreeConverter;
+import pl.edu.pg.app.clusters.TreeToClustersFamilyConverter;
+import pl.edu.pg.app.consensus.ConsensusFinder;
+import pl.edu.pg.app.view.TreeViewer;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,11 +28,20 @@ public class Application {
             case "help":
                 System.out.println(getHelp());
                 break;
-            case "-clusterstograph":
-                ClustersFamilyToGraphConverter clusters = new ClustersFamilyToGraphConverter();
-                //Drugim elementem listy argumentów powinien być plik ze zbiorami wierzchołków
-                String clustersFilename = args.get(1);
-                clusters.convert(clustersFilename);
+            case "-show":
+                TreeViewer treeViewer = new TreeViewer();
+                treeViewer.view(args.get(1));
+                break;
+            case "-clusterstotree":
+                ClustersFamilyToTreeConverter toTreeConverter = new ClustersFamilyToTreeConverter();
+                toTreeConverter.convert(args.get(1));
+                break;
+            case "-treetoclusters":
+                TreeToClustersFamilyConverter toClustersConverter = new TreeToClustersFamilyConverter();
+                toClustersConverter.convert(args.get(1));
+                break;
+            case "-consensus":
+                ConsensusFinder.Execute( args.subList( 1, args.size() ) );
                 break;
             default:
                 System.out.println("Nie rozpoznano polecenia!");
@@ -39,7 +51,13 @@ public class Application {
 
     private static String getHelp() {
         return "Dostępne akcje:\n"
-                + "-clusters: zamiana \"rodziny zgodnych klastrów\" do postaci drzewa\n"
+                + "-show <file>                     Wyświetlenie drzewa\n"
+                + "-consensus [options] <file>...   Wyznaczanie drzewa konsensusu dla zadanego zbioru drzew\n"
+                + "   Options:\n"
+                + "   -threshold <x>                Tolerancja przy wyznaczaniu drzewa konsensusus [domyślnie: 0.5]\n"
+                + "   -strict                       Wyznaczanie drzewa pełnego konsensusu\n"
+                + "-clustersToTree <file>           Zamiana \"rodziny zgodnych klastrów\" do postaci drzewa\n"
+                + "-treeToClusters <file>           Zamiana drzewa do postaci \"rodziny zgodnych klastrów\"\n"
                 //Tutaj proponuję dopisywać info o kolejnych funkcjonalnościach
                 + "...inne opcje...\n";
     }

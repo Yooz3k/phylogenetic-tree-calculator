@@ -4,7 +4,7 @@ import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.DefaultGraph;
 import org.graphstream.stream.file.FileSource;
 import org.graphstream.stream.file.FileSourceFactory;
-import pl.edu.pg.app.demos.FileSourceDemo;
+import pl.edu.pg.app.Application;
 
 import java.io.File;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class GraphLoader {
     }
 
     public static String getFilePath(String filename) {
-        URL res = FileSourceDemo.class.getClassLoader().getResource(filename);
+        URL res = Application.class.getClassLoader().getResource(filename);
         File file;
         try {
             file = Paths.get(res.toURI()).toFile();
