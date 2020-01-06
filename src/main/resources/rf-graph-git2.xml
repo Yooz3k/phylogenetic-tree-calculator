@@ -14,14 +14,14 @@
         <node id="7"/>
         <node id="8"/>
         <node id="9"/>
-        <edge id="e0" source="8" target="0"/>
+        <edge id="e0" source="8" target="2"/>
         <edge id="e1" source="8" target="1"/>
         <edge id="e2" source="8" target="7"/>
-        <edge id="e3" source="7" target="5"/>
+        <edge id="e3" source="7" target="9"/>
         <edge id="e4" source="7" target="6"/>
-        <edge id="e5" source="6" target="2"/>
-        <edge id="e6" source="6" target="9"/>
-        <edge id="e7" source="9" target="4"/>
-        <edge id="e8" source="9" target="3"/>
+        <edge id="e5" source="6" target="3"/>
+        <edge id="e6" source="6" target="4"/>
+        <edge id="e7" source="9" target="5"/>
+        <edge id="e8" source="9" target="0"/>
     </graph>
 </graphml>

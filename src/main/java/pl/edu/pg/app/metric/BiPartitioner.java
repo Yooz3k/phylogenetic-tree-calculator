@@ -13,7 +13,9 @@ import java.util.Set;
 import static pl.edu.pg.app.metric.GraphAttribute.BIT_PARTITION;
 import static pl.edu.pg.app.metric.GraphUtils.appendLabelToElement;
 import static pl.edu.pg.app.metric.GraphUtils.getEdgeToParent;
+import static pl.edu.pg.app.metric.GraphUtils.getGoValue;
 import static pl.edu.pg.app.metric.GraphUtils.getSecondNodeFromEdge;
+import static pl.edu.pg.app.metric.GraphUtils.incrAndGetGoValue;
 import static pl.edu.pg.app.metric.GraphUtils.isLeaf;
 
 public class BiPartitioner {
@@ -40,12 +42,17 @@ public class BiPartitioner {
     }
 
     void postOrder(Node currentNode, List<Node> nodes, Set<String> partitions) {
-        final Collection<Edge> leavingEdges = currentNode.getLeavingEdgeSet();
+        incrAndGetGoValue(currentNode);
         final List<Node> children = new ArrayList<>();
-        for (Edge leavingEdge : leavingEdges) {
-            Node child = getSecondNodeFromEdge(currentNode, leavingEdge);
-            children.add(child);
-            postOrder(child, nodes, partitions);
+        if (!isLeaf(currentNode)) {
+            final Collection<Edge> leavingEdges = currentNode.getLeavingEdgeSet();
+            for (Edge leavingEdge : leavingEdges) {
+                Node child = getSecondNodeFromEdge(currentNode, leavingEdge);
+                if (getGoValue(child) == 0) {
+                    children.add(child);
+                    postOrder(child, nodes, partitions);
+                }
+            }
         }
         nodes.add(currentNode);
         setEdgeBiPartition(currentNode, children, partitions);
@@ -59,9 +66,11 @@ public class BiPartitioner {
         } else if (root == null || currentNode.getIndex() != root.getIndex()) {
             final String nonLeafBiPartition = getNonLeafBiPartition(currentNode, children);
             final Edge edgeToParent = getEdgeToParent(currentNode, children.get(0), children.get(1));
-            appendLabelToElement(edgeToParent, "part(" + nonLeafBiPartition + ")");
-            edgeToParent.setAttribute(BIT_PARTITION.getText(),  nonLeafBiPartition);
-            partitions.add(nonLeafBiPartition);
+            if (edgeToParent.getAttribute(BIT_PARTITION.getText()) == null && !isLeaf(getSecondNodeFromEdge(currentNode, edgeToParent))) {
+                appendLabelToElement(edgeToParent, "part(" + nonLeafBiPartition + ")");
+                edgeToParent.setAttribute(BIT_PARTITION.getText(), nonLeafBiPartition);
+                partitions.add(nonLeafBiPartition);
+            }
         }
     }
 

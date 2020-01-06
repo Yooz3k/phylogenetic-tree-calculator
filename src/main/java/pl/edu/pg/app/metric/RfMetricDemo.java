@@ -6,6 +6,7 @@ import pl.edu.pg.app.converter.GraphToAdjListConverter;
 import pl.edu.pg.app.demos.FileSourceDemo;
 import pl.edu.pg.app.io.GraphLoader;
 import pl.edu.pg.app.struct.AdjacencyList;
+import pl.edu.pg.app.view.TreeViewer;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -13,8 +14,8 @@ import java.net.URL;
 import java.nio.file.Paths;
 
 public class RfMetricDemo {
-    private static final String FILENAME = "rf-graph.xml";
-    private static final String FILENAME2 = "rf-graph-git.xml";
+    private static final String FILENAME = "rf-graph-root.xml";
+    private static final String FILENAME2 = "rf-graph-root2.xml";
 
     public static void main(String[] args) throws URISyntaxException {
         Graph g = loadGraph(FILENAME);

@@ -40,9 +40,26 @@ public class GraphUtils {
         throw new IllegalStateException("Cannot find edge to parent");
     }
 
+
+
     public static void appendLabelToElement(Element node, String value) {
         String currVal = node.getAttribute(LABEL.getText());
         currVal = (currVal == null) ? "" : currVal + ", ";
         node.setAttribute(LABEL.getText(), currVal + value);
+    }
+
+    public static int incrAndGetGoValue(Element node) {
+        int val = getGoValue(node);
+        val++;
+        node.setAttribute("GO", val);
+        return val;
+    }
+
+    public static int getGoValue(Element node) {
+        Integer val = node.getAttribute("GO", Integer.class);
+        if (val == null) {
+            val = 0;
+        }
+        return val;
     }
 }
