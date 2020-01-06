@@ -3,19 +3,28 @@ package pl.edu.pg.app.metric;
 import lombok.NoArgsConstructor;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Element;
+import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
+import pl.edu.pg.app.converter.GraphConverter;
+import pl.edu.pg.app.converter.GraphToAdjListConverter;
+import pl.edu.pg.app.demos.FileSourceDemo;
+import pl.edu.pg.app.io.GraphLoader;
+import pl.edu.pg.app.struct.AdjacencyList;
 
+import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
 import static pl.edu.pg.app.metric.GraphAttribute.LABEL;
-import static pl.edu.pg.app.metric.GraphAttribute.LEAF;
 
 @NoArgsConstructor
 public class GraphUtils {
 
     public static boolean isLeaf(Node node) {
-        return node.<Boolean>getAttribute(LEAF.getText()).equals(Boolean.TRUE);
+        return node.getDegree() == 1;
     }
 
     public static Node getSecondNodeFromEdge(Node currentNode, Edge edge) {
@@ -48,11 +57,10 @@ public class GraphUtils {
         node.setAttribute(LABEL.getText(), currVal + value);
     }
 
-    public static int incrAndGetGoValue(Element node) {
+    public static void incrementGoValue(Element node) {
         int val = getGoValue(node);
         val++;
         node.setAttribute("GO", val);
-        return val;
     }
 
     public static int getGoValue(Element node) {
@@ -61,5 +69,22 @@ public class GraphUtils {
             val = 0;
         }
         return val;
+    }
+
+
+    public static Graph loadGraph(String filename) throws URISyntaxException {
+        String filepath = getFilePath(filename);
+        Graph g = GraphLoader.load(filepath, true);
+        GraphConverter<AdjacencyList> converter = new GraphToAdjListConverter();
+        AdjacencyList adj = converter.convert(g);
+        System.out.println("Adjacency list:\n" + adj.toString());
+        return g;
+    }
+
+
+    private static String getFilePath(String filename) throws URISyntaxException {
+        URL res = FileSourceDemo.class.getClassLoader().getResource(filename);
+        File file = Paths.get(res.toURI()).toFile();
+        return file.getAbsolutePath();
     }
 }

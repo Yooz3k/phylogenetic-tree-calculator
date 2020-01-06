@@ -15,7 +15,7 @@ import static pl.edu.pg.app.metric.GraphUtils.appendLabelToElement;
 import static pl.edu.pg.app.metric.GraphUtils.getEdgeToParent;
 import static pl.edu.pg.app.metric.GraphUtils.getGoValue;
 import static pl.edu.pg.app.metric.GraphUtils.getSecondNodeFromEdge;
-import static pl.edu.pg.app.metric.GraphUtils.incrAndGetGoValue;
+import static pl.edu.pg.app.metric.GraphUtils.incrementGoValue;
 import static pl.edu.pg.app.metric.GraphUtils.isLeaf;
 
 public class BiPartitioner {
@@ -42,7 +42,7 @@ public class BiPartitioner {
     }
 
     void postOrder(Node currentNode, List<Node> nodes, Set<String> partitions) {
-        incrAndGetGoValue(currentNode);
+        incrementGoValue(currentNode);
         final List<Node> children = new ArrayList<>();
         if (!isLeaf(currentNode)) {
             final Collection<Edge> leavingEdges = currentNode.getLeavingEdgeSet();
