@@ -1,12 +1,11 @@
 package pl.edu.pg.app.struct;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Cluster
+public class Cluster implements Comparable<Cluster>
 {
     private Cluster m_Parent = null;
     private List<Cluster> m_Clusters = new ArrayList<>();
@@ -24,6 +23,16 @@ public class Cluster
         this( id );
         m_Label = label;
         m_IsTerminal = true;
+    }
+
+    public Cluster( int id, Cluster... clusters )
+    {
+        this( id );
+
+        for( Cluster cluster : clusters )
+        {
+            Add( cluster );
+        }
     }
 
     public void Add( Cluster cluster )
@@ -204,5 +213,23 @@ public class Cluster
         }
 
         return sb.toString();
+    }
+
+    @Override
+    public int compareTo( Cluster cluster )
+    {
+        if( this == cluster )
+        {
+            // The same reference
+            return 0;
+        }
+
+        if( null == cluster )
+        {
+            // Null reference
+            return 1;
+        }
+
+        return m_Id - cluster.m_Id;
     }
 }

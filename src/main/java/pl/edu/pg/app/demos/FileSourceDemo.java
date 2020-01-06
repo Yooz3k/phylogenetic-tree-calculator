@@ -19,7 +19,7 @@ public class FileSourceDemo {
 
         Graph g = GraphLoader.load(filepath);
 
-        GraphConverter<AdjacencyList> converter = new GraphToAdjListConverter();
+        GraphConverter<AdjacencyList<String>> converter = new GraphToAdjListConverter();
         AdjacencyList adjList = converter.convert(g);
 
         //Print converted graph
