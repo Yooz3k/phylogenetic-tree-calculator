@@ -5,11 +5,8 @@ import org.graphstream.graph.Edge;
 import org.graphstream.graph.Element;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
-import pl.edu.pg.app.converter.GraphConverter;
-import pl.edu.pg.app.converter.GraphToAdjListConverter;
 import pl.edu.pg.app.demos.FileSourceDemo;
 import pl.edu.pg.app.io.GraphLoader;
-import pl.edu.pg.app.struct.AdjacencyList;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -75,9 +72,6 @@ public class GraphUtils {
     public static Graph loadGraph(String filename) throws URISyntaxException {
         String filepath = getFilePath(filename);
         Graph g = GraphLoader.load(filepath, true);
-        GraphConverter<AdjacencyList> converter = new GraphToAdjListConverter();
-        AdjacencyList adj = converter.convert(g);
-        System.out.println("Adjacency list:\n" + adj.toString());
         return g;
     }
 

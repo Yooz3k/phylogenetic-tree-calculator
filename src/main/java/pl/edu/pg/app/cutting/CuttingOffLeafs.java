@@ -7,13 +7,16 @@ import pl.edu.pg.app.metric.GraphUtils;
 
 import java.net.URISyntaxException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class CuttingOffLeafs {
 
     private Node root;
 
-    public void cut(String filename, Set<String> nodeIds) {
+    public void cut(String filename, List<String> s) {
+        Set<String> nodeIds = new HashSet<>(s);
+
         try {
             displayInitialGraph(filename);
             Graph g = GraphUtils.loadGraph(filename);
