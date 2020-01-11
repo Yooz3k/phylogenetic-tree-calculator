@@ -37,15 +37,21 @@ public class GraphUtils {
         return children;
     }
 
-    public static Edge getEdgeToParent(Node currentNode, Node child1, Node child2) {
+    public static Edge getEdgeToParent(Node currentNode, List<Node> children) {
         for (Edge edge : currentNode.getEdgeSet()) {
-            if (!getSecondNodeFromEdge(currentNode, edge).equals(child1) && !getSecondNodeFromEdge(currentNode, edge).equals(child2)) {
+            int edgeToChildCount = 0;
+            for (Node child : children) {
+                if (getSecondNodeFromEdge(currentNode, edge).equals(child)) {
+                    edgeToChildCount++;
+                    break;
+                }
+            }
+            if (edgeToChildCount == 0) {
                 return edge;
             }
         }
         throw new IllegalStateException("Cannot find edge to parent");
     }
-
 
 
     public static void appendLabelToElement(Element node, String value) {

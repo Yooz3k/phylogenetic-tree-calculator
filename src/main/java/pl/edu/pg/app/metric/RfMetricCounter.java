@@ -11,8 +11,8 @@ public class RfMetricCounter {
         final GraphAnalyzerResult g1Result = new GraphAnalyzer(g1).analyzeAndSetAttributes();
         final GraphAnalyzerResult g2Result = new GraphAnalyzer(g2).analyzeAndSetAttributes();
 
-        final BiPartitionerResult biPartResult1 = new BiPartitioner(g1Result.getRoot(), g1Result.getLeafs()).getNodesInPostOrderAndSetBipartitions(g1);
-        final BiPartitionerResult biPartResult2 = new BiPartitioner(g2Result.getRoot(), g2Result.getLeafs()).getNodesInPostOrderAndSetBipartitions(g2);
+        final BiPartitionerResult biPartResult1 = new BiPartitioner(g1Result.getRoot(), g1Result.getLeafs()).getNodesInPostOrderAndSetBiPartitions(g1);
+        final BiPartitionerResult biPartResult2 = new BiPartitioner(g2Result.getRoot(), g2Result.getLeafs()).getNodesInPostOrderAndSetBiPartitions(g2);
 
         normalizePartitions(biPartResult1.getPartitions(), biPartResult2.getPartitions());
 

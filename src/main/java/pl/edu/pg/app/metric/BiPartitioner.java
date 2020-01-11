@@ -29,7 +29,7 @@ public class BiPartitioner {
         this.leafsCount = leafsCount;
     }
 
-    public BiPartitionerResult getNodesInPostOrderAndSetBipartitions(Graph g) {
+    public BiPartitionerResult getNodesInPostOrderAndSetBiPartitions(Graph g) {
         leafNumber = 0;
         List<Node> nodes = new ArrayList<>();
         Set<String> partitions = new HashSet<>();
@@ -65,7 +65,7 @@ public class BiPartitioner {
             currentNode.setAttribute(BIT_PARTITION.getText(), leafBiPartition);
         } else if (root == null || currentNode.getIndex() != root.getIndex()) {
             final String nonLeafBiPartition = getNonLeafBiPartition(currentNode, children);
-            final Edge edgeToParent = getEdgeToParent(currentNode, children.get(0), children.get(1));
+            final Edge edgeToParent = getEdgeToParent(currentNode, children);
             if (edgeToParent.getAttribute(BIT_PARTITION.getText()) == null && !isLeaf(getSecondNodeFromEdge(currentNode, edgeToParent))) {
                 appendLabelToElement(edgeToParent, "part(" + nonLeafBiPartition + ")");
                 edgeToParent.setAttribute(BIT_PARTITION.getText(), nonLeafBiPartition);
@@ -76,10 +76,19 @@ public class BiPartitioner {
 
     private String getNonLeafBiPartition(Node currentNode, List<Node> children) {
         String s = "";
-        String c1 = getBitPartitionFromNode(currentNode, children.get(0));
-        String c2 = getBitPartitionFromNode(currentNode, children.get(1));
+        List<String> partitions = new ArrayList<>();
+        for (Node n : children) {
+            partitions.add(getBitPartitionFromNode(currentNode, n));
+        }
         for (int i = 0; i < leafsCount; i++) {
-            s += (c1.charAt(i) == '1' | c2.charAt(i) == '1') == Boolean.TRUE ? '1' : '0';
+            boolean found1 = false;
+            for (String partition : partitions) {
+                if (partition.charAt(i) == '1') {
+                    found1 = true;
+                    break;
+                }
+            }
+            s += found1 == Boolean.TRUE ? '1' : '0';
         }
         return s;
     }
