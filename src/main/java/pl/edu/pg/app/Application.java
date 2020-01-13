@@ -26,7 +26,6 @@ public class Application {
 
     private static void chooseOption(List<String> args) {
         String option = args.get(0).toLowerCase();
-        //Pozostałe elementy jako kolejne case'y
         switch (option) {
             case "help":
                 System.out.println(getHelp());
@@ -66,13 +65,12 @@ public class Application {
                 + "-show <file>                     Wyświetlenie drzewa\n"
                 + "-consensus [options] <file>...   Wyznaczanie drzewa konsensusu dla zadanego zbioru drzew\n"
                 + "   Options:\n"
-                + "   -threshold <x>                Tolerancja przy wyznaczaniu drzewa konsensusus [domyślnie: 0.5]\n"
+                + "   -threshold <x>                Tolerancja przy wyznaczaniu drzewa konsensusu [domyślnie: 0.5]\n"
                 + "   -strict                       Wyznaczanie drzewa pełnego konsensusu\n"
                 + "-clustersToTree <file>           Zamiana \"rodziny zgodnych klastrów\" do postaci drzewa\n"
                 + "-treeToClusters <file>           Zamiana drzewa do postaci \"rodziny zgodnych klastrów\"\n"
                 + "-compatibility <file>...         Wyznaczanie wspólnego rozszerzenia drzew\n"
                 + "-rf <file1> <file2>              Wyznaczenie odległości topologicznej RF między parą drzew\n"
-                + "-cut <file> <leaf>...            Obcięcie drzewa do zadanego podzbioru liści\n"
-                + "...inne opcje...\n";
+                + "-cut <file> <leaf>...            Obcięcie drzewa do zadanego podzbioru liści\n";
     }
 }
