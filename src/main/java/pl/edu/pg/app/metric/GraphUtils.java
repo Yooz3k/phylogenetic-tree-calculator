@@ -60,14 +60,14 @@ public class GraphUtils {
         node.setAttribute(LABEL.getText(), currVal + value);
     }
 
-    public static void incrementGoValue(Element node) {
-        int val = getGoValue(node);
+    public static void incrementVisitedValue(Element node) {
+        int val = getVisitedValue(node);
         val++;
-        node.setAttribute("GO", val);
+        node.setAttribute("VISITED", val);
     }
 
-    public static int getGoValue(Element node) {
-        Integer val = node.getAttribute("GO", Integer.class);
+    public static int getVisitedValue(Element node) {
+        Integer val = node.getAttribute("VISITED", Integer.class);
         if (val == null) {
             val = 0;
         }

@@ -24,7 +24,7 @@ public class CuttingOffLeafs {
 
             root = findRoot(g);
             removeLeafs(g, nodeIds);
-            removeUnnecesaryNodes(nodeIds, g);
+            removeUnnecessaryNodes(nodeIds, g);
 
             g.display();
         } catch (URISyntaxException e) {
@@ -34,7 +34,7 @@ public class CuttingOffLeafs {
 
     }
 
-    private void removeUnnecesaryNodes(Set<String> nodeIds, Graph g) {
+    private void removeUnnecessaryNodes(Set<String> nodeIds, Graph g) {
         if (root != null) {
             postOrderCutOffNodes(root, null, nodeIds, g);
         } else {
@@ -83,33 +83,32 @@ public class CuttingOffLeafs {
         }
 
         System.out.println(" - Node: " + node.getId());
-
         if (node.getDegree() == 1) {
             if (!nodeIds.contains(node.getId())) {
                 final Node secondNode = GraphUtils.getSecondNodeFromEdge(node, node.getEdge(0));
-//                inOrderCutOffNodes(secondNode, node, nodeIds, graph);
                 graph.removeNode(node);
                 System.out.println("- Leaf. Removing from graph, going to " + secondNode.getId());
             } else {
                 System.out.println("- Leaf to preserve. Going back.");
             }
-        } else if (isNodeWithTwoEdgesButNoLeaf(node, previousNode)) {
-            removeNodeAndMergeHisNeighbours(node, previousNode, nodeIds, graph);
+        } else if (isNodeWithTwoEdgesButNoLeaf(node)) {
+            removeNodeOfDegreeTwoAndMergeHisNeighbours(node, graph);
         }
     }
 
-    private void removeNodeAndMergeHisNeighbours(Node node, Node previousNode, Set<String> nodeIds, Graph graph) {
+    private void removeNodeOfDegreeTwoAndMergeHisNeighbours(Node node, Graph graph) {
         Node node1 = GraphUtils.getSecondNodeFromEdge(node, node.getEdge(0));
         Node node2 = GraphUtils.getSecondNodeFromEdge(node, node.getEdge(1));
-        System.out.println("- Node. Degree = 2, no leafs. Removing node from graph, making connection between " + node1.getId() + " oraz " + node2.getId());
+        System.out.println("- Node. Degree = 2, no leafs. Removing node from graph, making connection between " + node1.getId() + " and " + node2.getId());
         graph.addEdge("e" + node1.getId() + "-" + node2.getId(), node1, node2, false);
         graph.removeNode(node);
     }
 
-    private boolean isNodeWithTwoEdgesButNoLeaf(Node node, Node previousNode) {
+    private boolean isNodeWithTwoEdgesButNoLeaf(Node node) {
         if (node.getDegree() != 2) {
             return false;
         }
+
         int leafsFound = 0;
         for (Edge edge : node.getEdgeSet()) {
             final Node secondNode = GraphUtils.getSecondNodeFromEdge(node, edge);
@@ -120,10 +119,7 @@ public class CuttingOffLeafs {
         if (leafsFound > 1) {
             return false;
         }
-        if (root != null && root.equals(node)) {
-            return false;
-        }
-        return true;
+        return root == null || !root.equals(node);
     }
 
     private void displayInitialGraph(String filename) throws URISyntaxException {

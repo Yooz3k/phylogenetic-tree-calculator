@@ -14,7 +14,9 @@ public class RfMetricCounter {
         final BiPartitionerResult biPartResult1 = new BiPartitioner(g1Result.getRoot(), g1Result.getLeafs()).getNodesInPostOrderAndSetBiPartitions(g1);
         final BiPartitionerResult biPartResult2 = new BiPartitioner(g2Result.getRoot(), g2Result.getLeafs()).getNodesInPostOrderAndSetBiPartitions(g2);
 
-        normalizePartitions(biPartResult1.getPartitions(), biPartResult2.getPartitions());
+        if (checkIfSameNumberOfLeaves(biPartResult1.getPartitions(), biPartResult2.getPartitions())) {
+            System.out.println("Drzewa są różnej wielkości!");
+        }
 
         System.out.println(biPartResult1.toString());
         System.out.println(biPartResult2.toString());
@@ -23,30 +25,10 @@ public class RfMetricCounter {
         System.out.println("RF distance: " + distance);
     }
 
-    private void normalizePartitions(Set<String> partitions, Set<String> partitions2) {
+    private boolean checkIfSameNumberOfLeaves(Set<String> partitions, Set<String> partitions2) {
         int len1 = partitions.stream().findFirst().get().length();
         int len2 = partitions2.stream().findFirst().get().length();
-        int diff = len1 - len2;
-        if (diff != 0) {
-            System.out.println("Drzewa są różnej wielkości!");
-        }
-//        if (diff > 0) {
-//            addZeros(partitions2, diff);
-//        } else if (diff < 0) {
-//            addZeros(partitions, -diff);
-//        }
-    }
-
-    private void addZeros(Set<String> partitions, int diff) {
-        Set<String> newPartitions = new HashSet<>();
-        for (String s : partitions) {
-            for (int i = 0; i < diff; i++) {
-                s += '0';
-            }
-            newPartitions.add(s);
-        }
-        partitions.clear();
-        partitions.addAll(newPartitions);
+        return (len1 - len2) != 0;
     }
 
     private double calculateRfDistance(Set<String> partitions1, Set<String> partitions2) {
@@ -56,7 +38,7 @@ public class RfMetricCounter {
         p1.removeAll(partitions2);
         p2.removeAll(partitions1);
 
-        return (p1.size() + p2.size()) / 2.0;
+        return (p1.size() + p2.size());
 
     }
 }

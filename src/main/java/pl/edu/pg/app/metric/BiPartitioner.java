@@ -13,9 +13,9 @@ import java.util.Set;
 import static pl.edu.pg.app.metric.GraphAttribute.BIT_PARTITION;
 import static pl.edu.pg.app.metric.GraphUtils.appendLabelToElement;
 import static pl.edu.pg.app.metric.GraphUtils.getEdgeToParent;
-import static pl.edu.pg.app.metric.GraphUtils.getGoValue;
 import static pl.edu.pg.app.metric.GraphUtils.getSecondNodeFromEdge;
-import static pl.edu.pg.app.metric.GraphUtils.incrementGoValue;
+import static pl.edu.pg.app.metric.GraphUtils.getVisitedValue;
+import static pl.edu.pg.app.metric.GraphUtils.incrementVisitedValue;
 import static pl.edu.pg.app.metric.GraphUtils.isLeaf;
 
 public class BiPartitioner {
@@ -42,13 +42,13 @@ public class BiPartitioner {
     }
 
     void postOrder(Node currentNode, List<Node> nodes, Set<String> partitions) {
-        incrementGoValue(currentNode);
+        incrementVisitedValue(currentNode);
         final List<Node> children = new ArrayList<>();
         if (!isLeaf(currentNode)) {
             final Collection<Edge> leavingEdges = currentNode.getLeavingEdgeSet();
             for (Edge leavingEdge : leavingEdges) {
                 Node child = getSecondNodeFromEdge(currentNode, leavingEdge);
-                if (getGoValue(child) == 0) {
+                if (getVisitedValue(child) == 0) {
                     children.add(child);
                     postOrder(child, nodes, partitions);
                 }
