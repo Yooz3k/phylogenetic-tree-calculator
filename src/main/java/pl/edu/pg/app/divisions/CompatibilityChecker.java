@@ -1,13 +1,39 @@
 package pl.edu.pg.app.divisions;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import java.util.List;
 
 public class CompatibilityChecker {
 
-    public boolean compatible(List<List<String>> divisions) {
-        for (List<String> division1 : divisions) {
-            for (List<String> division2 : divisions.subList(divisions.indexOf(division1)+1, divisions.size())) {
-                if (!intersectionEmpty(division1, division2) && !isSubset(division1, division2)) {
+    public boolean compatible(List<Pair<List<String>, List<String>>> divisions) {
+        // Na początku sprawdzana jest poprawność każdego rozbicia
+        for (Pair<List<String>, List<String>> division : divisions) {
+            if (!intersectionEmpty(division.getLeft(), division.getRight())) {
+                return false;
+            }
+        }
+
+        // Następnie sprawdzany jest warunek, według którego dla dowolnych dwóch rozbić {A,B} i {C,D} spełniony jest warunek,
+        // że dokładnie jest zbiór spośród AxC, AxD, BxC i BxD jest pusty.
+        for (Pair<List<String>, List<String>> division1 : divisions) {
+            for (Pair<List<String>, List<String>> division2 : divisions.subList(divisions.indexOf(division1) + 1, divisions.size())) {
+                int emptyIntersections = 0;
+
+                if (intersectionEmpty(division1.getLeft(), division2.getLeft())) {
+                    emptyIntersections++;
+                }
+                if (intersectionEmpty(division1.getLeft(), division2.getRight())) {
+                    emptyIntersections++;
+                }
+                if (intersectionEmpty(division1.getRight(), division2.getLeft())) {
+                    emptyIntersections++;
+                }
+                if (intersectionEmpty(division1.getRight(), division2.getRight())) {
+                    emptyIntersections++;
+                }
+
+                if (emptyIntersections != 1) {
                     return false;
                 }
             }
@@ -28,12 +54,5 @@ public class CompatibilityChecker {
             }
         }
         return true;
-    }
-
-    /**
-     * Jeżeli którykolwiek ze zbiorów jest podzbiorem drugiego, metoda zwraca wartość true. W przypadku braku podzbiorów - false.
-     */
-    private boolean isSubset(List<String> division1, List<String> division2) {
-        return division1.containsAll(division2) || division2.containsAll(division1);
     }
 }
