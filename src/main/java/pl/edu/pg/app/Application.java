@@ -1,7 +1,7 @@
 package pl.edu.pg.app;
 
-import pl.edu.pg.app.clusters.ClustersFamilyToTreeConverter;
-import pl.edu.pg.app.clusters.TreeToClustersFamilyConverter;
+import pl.edu.pg.app.divisions.DivisionsFamilyToTreeConverter;
+import pl.edu.pg.app.divisions.TreeToDivisionsFamilyConverter;
 import pl.edu.pg.app.compatibility.CompatibilityFinder;
 import pl.edu.pg.app.consensus.ConsensusFinder;
 import pl.edu.pg.app.cutting.CuttingOffLeafs;
@@ -14,7 +14,7 @@ import java.util.List;
 public class Application {
 
     public static void main(String[] args) {
-        System.out.println("***PHYLOGENETIC ROOTED TREE CALCULATOR***\n");
+        System.out.println("***PHYLOGENETIC UNROOTED TREE CALCULATOR***\n");
 
         if (args.length == 0) {
             System.out.println("Nie wybrano żadnej akcji!");
@@ -34,13 +34,13 @@ public class Application {
                 TreeViewer treeViewer = new TreeViewer();
                 treeViewer.view(args.get(1));
                 break;
-            case "-clusterstotree":
-                ClustersFamilyToTreeConverter toTreeConverter = new ClustersFamilyToTreeConverter();
+            case "-divisionstotree":
+                DivisionsFamilyToTreeConverter toTreeConverter = new DivisionsFamilyToTreeConverter();
                 toTreeConverter.convert(args.get(1));
                 break;
-            case "-treetoclusters":
-                TreeToClustersFamilyConverter toClustersConverter = new TreeToClustersFamilyConverter();
-                toClustersConverter.convert(args.get(1));
+            case "-treetodivisions":
+                TreeToDivisionsFamilyConverter toDivisionsConverter = new TreeToDivisionsFamilyConverter();
+                toDivisionsConverter.convert(args.get(1));
                 break;
             case "-consensus":
                 ConsensusFinder.Execute(args.subList(1, args.size()));
@@ -67,8 +67,8 @@ public class Application {
                 + "   Options:\n"
                 + "   -threshold <x>                Tolerancja przy wyznaczaniu drzewa konsensusu [domyślnie: 0.5]\n"
                 + "   -strict                       Wyznaczanie drzewa pełnego konsensusu\n"
-                + "-clustersToTree <file>           Zamiana \"rodziny zgodnych klastrów\" do postaci drzewa\n"
-                + "-treeToClusters <file>           Zamiana drzewa do postaci \"rodziny zgodnych klastrów\"\n"
+                + "-divisionsToTree <file>          Zamiana \"rodziny zgodnych rozbić\" do postaci drzewa\n"
+                + "-treeToDivisions <file>          Zamiana drzewa do postaci \"rodziny zgodnych rozbić\"\n"
                 + "-compatibility <file>...         Wyznaczanie wspólnego rozszerzenia drzew\n"
                 + "-rf <file1> <file2>              Wyznaczenie odległości topologicznej RF między parą drzew\n"
                 + "-cut <file> <leaf>...            Obcięcie drzewa do zadanego podzbioru liści\n";

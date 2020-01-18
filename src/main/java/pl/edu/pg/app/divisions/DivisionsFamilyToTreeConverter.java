@@ -1,4 +1,4 @@
-package pl.edu.pg.app.clusters;
+package pl.edu.pg.app.divisions;
 
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.implementations.DefaultGraph;
@@ -20,17 +20,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ClustersFamilyToTreeConverter {
+public class DivisionsFamilyToTreeConverter {
 
     int edgeIndex = 0;
 
-    public void convert(String clustersFilename) {
-        List<List<String>> clusters = getClusters(clustersFilename);
-        if (clusters == null) {
+    public void convert(String divisionsFilename) {
+        List<List<String>> divisions = getDivisions(divisionsFilename);
+        if (divisions == null) {
             return;
         }
 
-        if (!checkCompatibility(clusters)) {
+        if (!checkCompatibility(divisions)) {
             return;
         }
 
@@ -38,13 +38,13 @@ public class ClustersFamilyToTreeConverter {
 
         //Sortujemy klastry wg ich liczebności rosnąco
         //Usuwamy też ewentualne puste klastry - są to błędne dane
-        clusters = clusters.stream()
+        divisions = divisions.stream()
                 .filter(c -> !c.isEmpty())
                 .sorted(Comparator.comparingInt(List::size))
                 .collect(Collectors.toList());
 
         //Dodajemy wszystkie liście jako wierzchołki
-        clusters.stream()
+        divisions.stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet())
                 .forEach(graph::addNode);
@@ -52,14 +52,14 @@ public class ClustersFamilyToTreeConverter {
         Map<String, List<String>> childrenPerParents = new HashMap<>();
 
         //Pozostają nam klastry o więcej niż jednym elemencie
-        clusters.stream()
-                .filter(cluster -> cluster.size() > 1).forEach(cluster -> {
+        divisions.stream()
+                .filter(division -> division.size() > 1).forEach(division -> {
             //Dla każdego takiego klastra tworzymy nowy wierzchołek
-            String nodeName = getNewNodeName(cluster);
+            String nodeName = getNewNodeName(division);
             graph.addNode(nodeName);
 
             //Dla każdego elementu klastra zapisujemy do mapy krawędź między nim i nowo utworzonym wierzchołkiem
-            childrenPerParents.put(nodeName, cluster);
+            childrenPerParents.put(nodeName, division);
         });
 
         LinkedHashMap<String, List<String>> childrenPerParentSortedBySizeDesc = sortBySizeDescending(childrenPerParents);
@@ -76,66 +76,66 @@ public class ClustersFamilyToTreeConverter {
 
         graph.display();
 
-        System.out.println(clusters);
+        System.out.println(divisions);
     }
 
 
-    private List<List<String>> getClusters(String clustersFilename) {
-        String fileContent = readFile(clustersFilename);
+    private List<List<String>> getDivisions(String divisionsFilename) {
+        String fileContent = readFile(divisionsFilename);
         if (fileContent == null) {
             return null;
         }
 
-        List<String> separateClusters = Arrays.asList(fileContent.split(";"));
-        List<List<String>> clusters = new ArrayList<>();
-        separateClusters.forEach(cluster -> {
-            List<String> nodes = Arrays.asList(cluster.split(","));
-            clusters.add(nodes);
+        List<String> separateDivisions = Arrays.asList(fileContent.split(";"));
+        List<List<String>> divisions = new ArrayList<>();
+        separateDivisions.forEach(division -> {
+            List<String> nodes = Arrays.asList(division.split(","));
+            divisions.add(nodes);
         });
 
-        return clusters;
+        return divisions;
     }
 
-    private String readFile(String clustersFilename) {
+    private String readFile(String divisionsFilename) {
         Path path;
         try {
             URL resourceUrl = getClass().getClassLoader()
-                    .getResource(clustersFilename);
+                    .getResource(divisionsFilename);
             if (resourceUrl == null) {
-                System.err.println("Nie znaleziono pliku o nazwie " + clustersFilename);
+                System.err.println("Nie znaleziono pliku o nazwie " + divisionsFilename);
                 return null;
             }
             path = Paths.get(resourceUrl.toURI());
         } catch (URISyntaxException e) {
-            System.err.println("Błąd odczytu pliku o nazwie " + clustersFilename);
+            System.err.println("Błąd odczytu pliku o nazwie " + divisionsFilename);
             e.printStackTrace();
             return null;
         }
 
-        String clusters;
+        String divisions;
         try (Stream<String> lines = Files.lines(path)) {
-            clusters = lines.collect(Collectors.joining("\n"));
+            divisions = lines.collect(Collectors.joining("\n"));
         } catch (IOException e) {
             System.err.println("Błąd odczytu pliku!");
             e.printStackTrace();
             return null;
         }
-        return clusters;
+        return divisions;
     }
 
-    private boolean checkCompatibility(List<List<String>> clusters) {
+    private boolean checkCompatibility(List<List<String>> divisions) {
         CompatibilityChecker compatibilityChecker = new CompatibilityChecker();
-        if (!compatibilityChecker.compatible(clusters)) {
-            System.out.println("Wczytana rodzina klastrów nie jest zgodna!");
+        if (!compatibilityChecker.compatible(divisions)) {
+            System.out.println("Wczytana rodzina rozbić nie jest zgodna!");
             return false;
         } else {
-            System.out.println("Wczytana rodzina klastrów jest zgodna!");
+            System.out.println("Wczytana rodzina rozbić jest zgodna!");
             return true;
         }
     }
 
-    private String getNewNodeName(List<String> clusters) {
-        return String.join("&", clusters);
+    private String getNewNodeName(List<String> divisions) {
+        return String.join("&", divisions);
     }
 
     private String getEdgeName() {

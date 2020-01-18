@@ -1,4 +1,4 @@
-package pl.edu.pg.app.clusters;
+package pl.edu.pg.app.divisions;
 
 import org.graphstream.graph.Graph;
 import pl.edu.pg.app.converter.GraphToAdjListConverter;
@@ -8,7 +8,7 @@ import pl.edu.pg.app.struct.AdjacencyList;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class TreeToClustersFamilyConverter {
+public class TreeToDivisionsFamilyConverter {
 
     private AdjacencyList<String> tree;
     private List<String> leaves;
@@ -16,16 +16,16 @@ public class TreeToClustersFamilyConverter {
     public void convert(String treeFilename) {
         tree = loadTreeFromFile(treeFilename);
 
-        Set<Set<String>> clusters = new HashSet<>();
+        Set<Set<String>> divisions = new HashSet<>();
         leaves = tree.GetNodes().stream()
-                .filter( node -> tree.GetNodeEdges( node ).isEmpty() )
+                .filter(node -> tree.GetNodeEdges(node).isEmpty())
                 .collect(Collectors.toList());
 
-        tree.GetNodes().forEach( keyNode -> {
-            List<String> adjacentNodes = tree.GetNodeEdges( keyNode );
+        tree.GetNodes().forEach(keyNode -> {
+            List<String> adjacentNodes = tree.GetNodeEdges(keyNode);
             //Jeżeli wierzchołek jest liściem, jest on dodawany jako jednoelementowa kolekcja do rodziny
             if (adjacentNodes.isEmpty()) {
-                clusters.add(Collections.singleton(keyNode));
+                divisions.add(Collections.singleton(keyNode));
             } else {
                 //Zbieramy wierzchołki, które są liśćmi
                 List<String> currentNodeLeaves = adjacentNodes.stream()
@@ -40,11 +40,11 @@ public class TreeToClustersFamilyConverter {
                 //Dla wszystkich tych, które nie są liśćmi, musimy znaleźć ich wszystkie liście
                 currentNodeLeaves.addAll(getLeaves(notLeafNodes));
 
-                clusters.add(Set.copyOf( currentNodeLeaves ));
+                divisions.add(Set.copyOf(currentNodeLeaves));
             }
         });
 
-        System.out.println(clusters);
+        System.out.println(divisions);
     }
 
     private Set<String> getLeaves(List<String> adjacentNodes) {
