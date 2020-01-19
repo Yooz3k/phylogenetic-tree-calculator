@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns"  
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns
+     http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <graph id="G" edgedefault="undirected">
+    <node id="n1"/>
+    <node id="n2"/>
+    <node id="n3"/>
+    <node id="n4"/>
+    <node id="n5"/>
+    <node id="n6"/>
+    <node id="n7"/>
+    <node id="n8"/>
+    <node id="w1"/>
+    <node id="w2"/>
+    <node id="w3"/>
+    <node id="w4"/>
+    <node id="w5"/>
+    <node id="w6"/>
+    <edge id="e1" source="n1" target="w1"/>
+    <edge id="e2" source="n2" target="w1"/>
+    <edge id="e3" source="n3" target="w2"/>
+    <edge id="e4" source="n4" target="w3"/>
+    <edge id="e5" source="n5" target="w6"/>
+    <edge id="e6" source="n6" target="w6"/>
+    <edge id="e7" source="n7" target="w5"/>
+    <edge id="e8" source="n8" target="w5"/>
+    <edge id="e9" source="w1" target="w2"/>
+    <edge id="e10" source="w2" target="w3"/>
+    <edge id="e11" source="w3" target="w4"/>
+    <edge id="e12" source="w4" target="w5"/>
+    <edge id="e13" source="w4" target="w6"/>
+  </graph>
+</graphml>
