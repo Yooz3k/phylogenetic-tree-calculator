@@ -11,8 +11,8 @@ public class RfMetricCounter {
         final GraphAnalyzerResult g1Result = new GraphAnalyzer(g1).analyzeAndSetAttributes();
         final GraphAnalyzerResult g2Result = new GraphAnalyzer(g2).analyzeAndSetAttributes();
 
-        final BiPartitionerResult biPartResult1 = new BiPartitioner(g1Result.getRoot(), g1Result.getLeafs()).getNodesInPostOrderAndSetBiPartitions(g1);
-        final BiPartitionerResult biPartResult2 = new BiPartitioner(g2Result.getRoot(), g2Result.getLeafs()).getNodesInPostOrderAndSetBiPartitions(g2);
+        final BiPartitionerResult biPartResult1 = new BiPartitioner(g1Result.getLeafs()).getNodesInPostOrderAndSetBiPartitions(g1, g1Result.getRoot());
+        final BiPartitionerResult biPartResult2 = new BiPartitioner(g2Result.getLeafs()).getNodesInPostOrderAndSetBiPartitions(g2, g2Result.getRoot());
 
         if (checkIfSameNumberOfLeaves(biPartResult1.getPartitions(), biPartResult2.getPartitions())) {
             System.out.println("Drzewa są różnej wielkości!");

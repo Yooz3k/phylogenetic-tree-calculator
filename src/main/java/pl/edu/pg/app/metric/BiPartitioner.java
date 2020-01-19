@@ -1,5 +1,6 @@
 package pl.edu.pg.app.metric;
 
+import lombok.Data;
 import org.graphstream.graph.Edge;
 import org.graphstream.graph.Graph;
 import org.graphstream.graph.Node;
@@ -20,28 +21,27 @@ import static pl.edu.pg.app.metric.GraphUtils.isLeaf;
 
 public class BiPartitioner {
 
-    private final Node root;
     private final int leafsCount;
     private int leafNumber;
 
-    public BiPartitioner(Node root, int leafsCount) {
-        this.root = root;
+    public BiPartitioner(int leafsCount) {
         this.leafsCount = leafsCount;
     }
 
-    public BiPartitionerResult getNodesInPostOrderAndSetBiPartitions(Graph g) {
+    public BiPartitionerResult getNodesInPostOrderAndSetBiPartitions(Graph g, Node root) {
         leafNumber = 0;
         List<Node> nodes = new ArrayList<>();
         Set<String> partitions = new HashSet<>();
         if (root != null) {
-            postOrder(root, nodes, partitions);
+            postOrder(root, nodes, partitions, new InitialConfiguration(root, g.getNodeCount(), root));
         } else {
-            postOrder(g.getNodeSet().stream().filter(f -> !isLeaf(f)).findAny().get(), nodes, partitions);
+            final Node initialNode = g.getNodeSet().stream().filter(f -> !isLeaf(f)).findAny().get();
+            postOrder(initialNode, nodes, partitions, new InitialConfiguration(g.getNodeCount(), initialNode));
         }
         return new BiPartitionerResult(partitions, nodes);
     }
 
-    void postOrder(Node currentNode, List<Node> nodes, Set<String> partitions) {
+    void postOrder(Node currentNode, List<Node> nodes, Set<String> partitions, InitialConfiguration conf) {
         incrementVisitedValue(currentNode);
         final List<Node> children = new ArrayList<>();
         if (!isLeaf(currentNode)) {
@@ -50,21 +50,24 @@ public class BiPartitioner {
                 Node child = getSecondNodeFromEdge(currentNode, leavingEdge);
                 if (getVisitedValue(child) == 0) {
                     children.add(child);
-                    postOrder(child, nodes, partitions);
+                    postOrder(child, nodes, partitions, conf);
                 }
             }
         }
         nodes.add(currentNode);
-        setEdgeBiPartition(currentNode, children, partitions);
+        setEdgeBiPartition(currentNode, children, partitions, conf, nodes.size());
     }
 
-    private void setEdgeBiPartition(Node currentNode, List<Node> children, Set<String> partitions) {
+    private void setEdgeBiPartition(Node currentNode, List<Node> children, Set<String> partitions, final InitialConfiguration conf, int nodesVisited) {
         if (isLeaf(currentNode)) {
             final String leafBiPartition = getLeafBiPartition(leafNumber++);
             appendLabelToElement(currentNode, leafBiPartition);
             currentNode.setAttribute(BIT_PARTITION.getText(), leafBiPartition);
-        } else if (root == null || currentNode.getIndex() != root.getIndex()) {
+        } else if (!conf.hasRoot() || currentNode.getIndex() != conf.getRoot().getIndex()) {
             final String nonLeafBiPartition = getNonLeafBiPartition(currentNode, children);
+            if (!conf.hasRoot() && returnedToInitialNode(currentNode, conf, nodesVisited)) {
+                return;
+            }
             final Edge edgeToParent = getEdgeToParent(currentNode, children);
             if (edgeToParent.getAttribute(BIT_PARTITION.getText()) == null && !isLeaf(getSecondNodeFromEdge(currentNode, edgeToParent))) {
                 appendLabelToElement(edgeToParent, "part(" + nonLeafBiPartition + ")");
@@ -72,6 +75,10 @@ public class BiPartitioner {
                 partitions.add(nonLeafBiPartition);
             }
         }
+    }
+
+    private boolean returnedToInitialNode(Node currentNode, InitialConfiguration conf, int nodesVisited) {
+        return nodesVisited == conf.getNodes() && conf.getInitialNode().equals(currentNode);
     }
 
     private String getNonLeafBiPartition(Node currentNode, List<Node> children) {
@@ -111,5 +118,27 @@ public class BiPartitioner {
             }
         }
         return s;
+    }
+
+    @Data
+    private class InitialConfiguration {
+        private final int nodes;
+        private final Node initialNode;
+        private Node root;
+
+        public InitialConfiguration(Node root, int nodes, Node initialNode) {
+            this.nodes = nodes;
+            this.initialNode = initialNode;
+            this.root = root;
+        }
+
+        public InitialConfiguration(int nodes, Node initialNode) {
+            this.nodes = nodes;
+            this.initialNode = initialNode;
+        }
+
+        public boolean hasRoot() {
+            return root != null;
+        }
     }
 }
