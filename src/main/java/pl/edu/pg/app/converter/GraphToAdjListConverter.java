@@ -13,9 +13,9 @@ public class GraphToAdjListConverter implements GraphConverter<AdjacencyList<Str
         for (Edge edge : graph.getEachEdge()) {
             String node0 = edge.getNode0().getId();
             String node1 = edge.getNode1().getId();
-            adjList.AddNode( node0 );
-            adjList.AddNode( node1 );
-            adjList.AddEdge( node0, node1, edge.isDirected() );
+            adjList.AddNode(node0);
+            adjList.AddNode(node1);
+            adjList.AddEdge(node0, node1, edge.isDirected());
         }
 
         return adjList;
