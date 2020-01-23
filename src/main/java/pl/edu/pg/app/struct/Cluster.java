@@ -2,6 +2,7 @@ package pl.edu.pg.app.struct;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,6 +33,39 @@ public class Cluster implements Comparable<Cluster>
         for( Cluster cluster : clusters )
         {
             Add( cluster );
+        }
+    }
+
+    public static Cluster CopyOf( Cluster cluster )
+    {
+        Cluster newCluster = new Cluster( cluster.m_Id );
+        newCluster.m_Label = cluster.m_Label;
+        newCluster.m_IsTerminal = cluster.m_IsTerminal;
+
+        for( Cluster child : cluster.m_Clusters )
+        {
+            Cluster childCopy = CopyOf( child );
+            childCopy.m_Parent = newCluster;
+
+            newCluster.m_Clusters.add( childCopy );
+        }
+
+        return newCluster;
+    }
+
+    public void ResetIndex()
+    {
+        // Generate new node indexes
+        ResetIndex( new Random() );
+    }
+
+    private void ResetIndex( Random random )
+    {
+        m_Id = random.nextInt();
+
+        for( Cluster child : m_Clusters )
+        {
+            child.ResetIndex( random );
         }
     }
 
@@ -145,17 +179,28 @@ public class Cluster implements Comparable<Cluster>
             // Look at me...
             // I'm the root now
             Cluster newRoot = new Cluster( m_Id );
-
-            if( m_Parent != null )
-            {
-                Cluster newParent = new Cluster( m_Parent.m_Id );
-                newParent.m_Clusters = new ArrayList<>( m_Parent.m_Clusters );
-                newParent.m_Clusters.remove( this );
-                newRoot.m_Clusters.add( newParent );
-            }
-
             newRoot.m_Label = m_Label;
             newRoot.m_IsTerminal = m_IsTerminal;
+            newRoot.m_Clusters.addAll( m_Clusters );
+
+            Cluster previous = newRoot;
+            Cluster previousParent = node;
+            Cluster parent = m_Parent;
+            while( parent != null )
+            {
+                Cluster newParent = new Cluster( parent.m_Id );
+                newParent.m_Clusters = new ArrayList<>( parent.m_Clusters );
+                newParent.m_Clusters.remove( previousParent );
+                newParent.m_Parent = previous;
+
+                previous.m_Clusters.add( newParent );
+
+                previous = newParent;
+                previousParent = parent;
+                parent = parent.m_Parent;
+            }
+
+            newRoot.RemoveSimpleNodes();
 
             return newRoot;
         }
@@ -207,6 +252,31 @@ public class Cluster implements Comparable<Cluster>
                         .anyMatch( child -> child.Contains( cluster ) );
     }
 
+    private void RemoveSimpleNodes()
+    {
+        if( m_Clusters.size() == 1 )
+        {
+            Cluster next = m_Clusters.get( 0 );
+
+            if( next.m_IsTerminal && !m_IsTerminal )
+            {
+                m_Label = next.m_Label;
+                m_IsTerminal = true;
+            }
+
+            m_Clusters = next.m_Clusters;
+
+            RemoveSimpleNodes();
+        }
+        else
+        {
+            for( Cluster cluster : m_Clusters )
+            {
+                cluster.RemoveSimpleNodes();
+            }
+        }
+    }
+
     @Override
     public boolean equals( Object obj )
     {
@@ -240,7 +310,8 @@ public class Cluster implements Comparable<Cluster>
         {
             sb.append( m_Label );
         }
-        else
+
+        if( !m_Clusters.isEmpty() )
         {
             sb.append( '(' );
             sb.append( m_Clusters.stream()

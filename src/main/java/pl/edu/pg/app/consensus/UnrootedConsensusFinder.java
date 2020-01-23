@@ -29,9 +29,13 @@ public class UnrootedConsensusFinder extends ConsensusFinder
         }
 
         // 3. Select largest consensus tree
-        return consensusTrees.stream()
+        Cluster consensusTree = consensusTrees.stream()
                 .max( Comparator.comparingInt( cluster -> cluster.GetAllClusters().size() ) )
                 .orElseThrow();
+
+        consensusTree.ResetIndex();
+
+        return consensusTree;
     }
 
     private List<Cluster> ShuffleTree( Cluster tree )

@@ -30,6 +30,8 @@ public class ClusterDemo extends FileSourceDemo
         Test_Equals();
         Test_Insert();
         Test_Remove();
+        Test_GetRootedAt();
+        Test_GetRootedAt_InternalRoot();
 
         // Display loaded graph
         g.display();
@@ -130,6 +132,67 @@ public class ClusterDemo extends FileSourceDemo
         if( !c.equals( a ) )
         {
             System.out.println( "a: " + a + " (terminals: " + a.GetTerminals() + ")" );
+            System.out.println( "c: " + c + " (terminals: " + c.GetTerminals() + ")" );
+        }
+    }
+
+    private static void Test_GetRootedAt()
+    {
+        Cluster a_root = new Cluster( 3, "A" );
+        Cluster c = new Cluster( 0,
+                new Cluster( 1,
+                        new Cluster( 2,
+                                a_root,
+                                new Cluster( 4, "D" ) ),
+                        new Cluster( 5, "C" ) ),
+                new Cluster( 6, "B" ) );
+
+        Cluster aTree = c.GetRootedAt( a_root );
+
+        System.out.println( "\nTEST: GetRootedAt" );
+        System.out.println( aTree.toString().equals( "A(D,(C,B))" ) );
+
+        if( !aTree.toString().equals( "A(D,(C,B))" ) )
+        {
+            System.out.println( "a: " + aTree.toString() );
+        }
+
+        System.out.println( c.equals( aTree ) );
+
+        if( !c.equals( aTree ) )
+        {
+            System.out.println( "a: " + aTree + " (terminals: " + aTree.GetTerminals() + ")" );
+            System.out.println( "c: " + c + " (terminals: " + c.GetTerminals() + ")" );
+        }
+    }
+
+    private static void Test_GetRootedAt_InternalRoot()
+    {
+        Cluster e_root = new Cluster( 1,
+                new Cluster( 2,
+                        new Cluster( 3, "A" ),
+                        new Cluster( 4, "D" ) ),
+                new Cluster( 5, "C" ) );
+
+        Cluster c = new Cluster( 0,
+                e_root,
+                new Cluster( 6, "B" ) );
+
+        Cluster eTree = c.GetRootedAt( e_root );
+
+        System.out.println( "\nTEST: GetRootedAt" );
+        System.out.println( eTree.toString().equals( "((A,D),C,B)" ) );
+
+        if( !eTree.toString().equals( "((A,D),C,B)" ) )
+        {
+            System.out.println( "a: " + eTree.toString() );
+        }
+
+        System.out.println( c.equals( eTree ) );
+
+        if( !c.equals( eTree ) )
+        {
+            System.out.println( "e: " + eTree + " (terminals: " + eTree.GetTerminals() + ")" );
             System.out.println( "c: " + c + " (terminals: " + c.GetTerminals() + ")" );
         }
     }
