@@ -10,7 +10,7 @@ import java.net.URISyntaxException;
 
 public class ClusterDemo extends FileSourceDemo
 {
-    private static final String FILENAME = "simple_tree.xml";
+    private static final String FILENAME = "((((n0,n1),n4),n6),(n9,n10)).xml";
 
     public static void main( String[] args ) throws URISyntaxException
     {
@@ -28,6 +28,8 @@ public class ClusterDemo extends FileSourceDemo
         Test_GetAllClusters( cluster );
         Test_GetTerminals( cluster );
         Test_Equals();
+        Test_Insert();
+        Test_Remove();
 
         // Display loaded graph
         g.display();
@@ -64,10 +66,71 @@ public class ClusterDemo extends FileSourceDemo
         System.out.println( "\nTEST: Equals" );
         System.out.println( d.equals( b ) );
 
-        if( d != b )
+        if( !d.equals( b ) )
         {
             System.out.println( "b: " + b + " (terminals: " + b.GetTerminals() + ")" );
             System.out.println( "d: " + d + " (terminals: " + d.GetTerminals() + ")" );
+        }
+    }
+
+    private static void Test_Insert()
+    {
+        Cluster a = new Cluster( 0,
+                new Cluster( 1,
+                        new Cluster( 11, "A" ),
+                        new Cluster( 12, "C" ) ),
+                new Cluster( 2, "B" ) );
+        Cluster b = new Cluster( 3,
+                new Cluster( 4, "A" ),
+                new Cluster( 5, "D" ) );
+        a.Insert( b );
+
+        Cluster c = new Cluster( 6,
+                new Cluster( 13,
+                    new Cluster( 7,
+                            new Cluster( 8, "A" ),
+                            new Cluster( 9, "D" ) ),
+                    new Cluster( 14, "C" ) ),
+                new Cluster( 10, "B" ) );
+
+        System.out.println( "\nTEST: Insert" );
+        System.out.println( c.equals( a ) );
+
+        if( !c.equals( a ) )
+        {
+            System.out.println( "a: " + a + " (terminals: " + a.GetTerminals() + ")" );
+            System.out.println( "c: " + c + " (terminals: " + c.GetTerminals() + ")" );
+        }
+    }
+
+    private static void Test_Remove()
+    {
+        Cluster a = new Cluster( 0,
+                new Cluster( 1,
+                        new Cluster( 11, "A" ),
+                        new Cluster( 12, "C" ),
+                        new Cluster( 15, "D" ) ),
+                new Cluster( 2, "B" ) );
+
+        Cluster c = new Cluster( 6,
+                new Cluster( 13,
+                        new Cluster( 7,
+                                new Cluster( 8, "A" ),
+                                new Cluster( 9, "D" ) ),
+                        new Cluster( 14, "C" ) ),
+                new Cluster( 10, "B" ) );
+        Cluster b = new Cluster( 3,
+                new Cluster( 4, "A" ),
+                new Cluster( 5, "D" ) );
+        c.Remove( b );
+
+        System.out.println( "\nTEST: Remove" );
+        System.out.println( c.equals( a ) );
+
+        if( !c.equals( a ) )
+        {
+            System.out.println( "a: " + a + " (terminals: " + a.GetTerminals() + ")" );
+            System.out.println( "c: " + c + " (terminals: " + c.GetTerminals() + ")" );
         }
     }
 }

@@ -11,17 +11,15 @@ import java.util.stream.Collectors;
 
 public class CompatibilityFinder
 {
-    private Random m_Random = new Random();
+    protected Random m_Random = new Random();
+    protected List<String> m_TreeFilenames;
 
     public static void Execute( List<String> arguments )
     {
-        CompatibilityFinder compatibilityFinder = new CompatibilityFinder();
-
-        // Process arguments and return unparsed list
-        arguments = compatibilityFinder.ParseArguments( arguments );
+        CompatibilityFinder compatibilityFinder = CreateCompatibilityFinder( arguments );
 
         GraphToClusterConverter graphConverter = new GraphToClusterConverter();
-        List<Cluster> trees = arguments.parallelStream()
+        List<Cluster> trees = compatibilityFinder.m_TreeFilenames.parallelStream()
                 .map( GraphLoader::load )
                 .map( graphConverter::convert )
                 .collect( Collectors.toList() );
@@ -45,12 +43,51 @@ public class CompatibilityFinder
         }
     }
 
-    private List<String> ParseArguments( List<String> arguments )
+    private static CompatibilityFinder CreateCompatibilityFinder( List<String> arguments )
     {
-        return arguments;
+        boolean unrooted = false;
+
+        // Process arguments and return unparsed list
+        boolean allArgumentsProcessed = false;
+
+        ListIterator<String> argumentIterator = arguments.listIterator();
+        while( !allArgumentsProcessed && argumentIterator.hasNext() )
+        {
+            switch( argumentIterator.next() )
+            {
+                case "-unrooted":
+                    unrooted = true;
+                    break;
+
+                default:
+                    // Move iterator back - argument was not processed
+                    argumentIterator.previous();
+                    allArgumentsProcessed = true;
+                    break;
+            }
+        }
+
+        // Create the finder instance
+        CompatibilityFinder compatibilityFinder;
+
+        if( unrooted )
+        {
+            // Handle unrooted trees
+            compatibilityFinder = new UnrootedCompatibilityFinder();
+        }
+        else
+        {
+            // Handle rooted trees
+            compatibilityFinder = new CompatibilityFinder();
+        }
+
+        // Update config
+        compatibilityFinder.m_TreeFilenames = arguments.subList( argumentIterator.nextIndex(), arguments.size() );
+
+        return compatibilityFinder;
     }
 
-    private Cluster FindCompatibleTree( List<Cluster> nodes, List<List<Cluster>> treeClusters )
+    protected Cluster FindCompatibleTree( List<Cluster> nodes, List<List<Cluster>> treeClusters )
     {
         // Implementation of BuildST from
         // https://arxiv.org/pdf/1510.07758.pdf
@@ -121,7 +158,7 @@ public class CompatibilityFinder
         return root;
     }
 
-    private List<List<Cluster>> GetConnectedComponents( List<Cluster> nodes )
+    protected List<List<Cluster>> GetConnectedComponents( List<Cluster> nodes )
     {
         // Create the graph where nodes are connected if both lead to one or more common terminals
         AdjacencyList<Cluster> relatedClusters = new AdjacencyList<>();
@@ -163,14 +200,14 @@ public class CompatibilityFinder
         return connectedComponents;
     }
 
-    private List<Cluster> IntersectClusters( List<Cluster> a, List<Cluster> b )
+    protected List<Cluster> IntersectClusters( List<Cluster> a, List<Cluster> b )
     {
         return a.stream()
                 .filter( aCluster -> b.stream().anyMatch( bCluster -> aCluster.GetId() == bCluster.GetId() ) )
                 .collect( Collectors.toList() );
     }
 
-    private <T> boolean AnyIntersects( List<T> a, List<T> b )
+    protected <T> boolean AnyIntersects( List<T> a, List<T> b )
     {
         return a.stream().anyMatch( b::contains );
     }

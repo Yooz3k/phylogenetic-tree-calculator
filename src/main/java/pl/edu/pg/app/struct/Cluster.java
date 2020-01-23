@@ -46,8 +46,14 @@ public class Cluster implements Comparable<Cluster>
 
     public void Insert( Cluster cluster )
     {
+        // Cache for following filter calls
+        List<String> currentTreeTerminals = GetTerminals();
+
         // Find the most suitable place for new cluster
-        List<String> clusterTerminals = cluster.GetTerminals();
+        // Remove leaves which are not present in current tree
+        List<String> clusterTerminals = cluster.GetTerminalsStream()
+                .filter( currentTreeTerminals::contains )
+                .collect( Collectors.toList() );
 
         for( Cluster child : m_Clusters )
         {
@@ -69,6 +75,9 @@ public class Cluster implements Comparable<Cluster>
                 .collect( Collectors.toList() );
 
         m_Clusters.add( cluster );
+
+        // Node is not terminal anymore (if it was)
+        m_IsTerminal = false;
     }
 
     public void Remove( Cluster cluster )
@@ -77,11 +86,12 @@ public class Cluster implements Comparable<Cluster>
 
         if( GetTerminals().equals( clusterTerminals ) )
         {
-            assert (m_Parent != null);
-
-            // Move all child clusters to the parent
-            m_Parent.m_Clusters.addAll( m_Clusters );
-            m_Parent.m_Clusters.remove( this );
+            if( m_Parent != null )
+            {
+                // Move all child clusters to the parent
+                m_Parent.m_Clusters.addAll( m_Clusters );
+                m_Parent.m_Clusters.remove( this );
+            }
         }
         else
         {
@@ -95,9 +105,6 @@ public class Cluster implements Comparable<Cluster>
                 }
             }
         }
-
-        // Cluster not found?
-        assert( false );
     }
 
     public int GetId()
@@ -131,36 +138,66 @@ public class Cluster implements Comparable<Cluster>
         return allClusters;
     }
 
-    public boolean HasTerminal( int id )
+    public Cluster GetRootedAt( Cluster node )
     {
-        if( !m_IsTerminal )
+        if( node.m_Id == m_Id )
         {
-            return m_Clusters.stream()
-                    .anyMatch( cluster -> cluster.HasTerminal( id ) );
+            // Look at me...
+            // I'm the root now
+            Cluster newRoot = new Cluster( m_Id );
+
+            if( m_Parent != null )
+            {
+                Cluster newParent = new Cluster( m_Parent.m_Id );
+                newParent.m_Clusters = new ArrayList<>( m_Parent.m_Clusters );
+                newParent.m_Clusters.remove( this );
+                newRoot.m_Clusters.add( newParent );
+            }
+
+            newRoot.m_Label = m_Label;
+            newRoot.m_IsTerminal = m_IsTerminal;
+
+            return newRoot;
         }
-        return id == m_Id;
+
+        // Early quit for terminal nodes
+        if( m_IsTerminal )
+        {
+            return null;
+        }
+
+        for( Cluster cluster : m_Clusters )
+        {
+            Cluster newRootedTree = cluster.GetRootedAt( node );
+
+            if( newRootedTree != null )
+            {
+                return newRootedTree;
+            }
+        }
+
+        return null;
     }
 
     public List<String> GetTerminals()
     {
-        if( !m_IsTerminal )
-        {
-            return m_Clusters.stream()
-                    .flatMap( Cluster::GetTerminalsStream )
-                    .sorted()
-                    .collect( Collectors.toList() );
-        }
-        return List.of( m_Label );
+        return GetTerminalsStream()
+                .collect( Collectors.toList() );
     }
 
     public Stream<String> GetTerminalsStream()
     {
-        if( !m_IsTerminal )
+        var terminals = m_Clusters.stream()
+                .flatMap( Cluster::GetTerminalsStream )
+                .collect( Collectors.toCollection( ArrayList::new ) );
+
+        if( m_IsTerminal )
         {
-            return m_Clusters.stream()
-                    .flatMap( Cluster::GetTerminalsStream );
+            terminals.add( m_Label );
         }
-        return Stream.of( m_Label );
+
+        return terminals.stream()
+                .sorted();
     }
 
     public boolean Contains( Cluster cluster )
