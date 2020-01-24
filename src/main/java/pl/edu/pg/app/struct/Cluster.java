@@ -53,10 +53,11 @@ public class Cluster implements Comparable<Cluster>
         return newCluster;
     }
 
-    public void ResetIndex()
+    public Cluster ResetIndex()
     {
         // Generate new node indexes
         ResetIndex( new Random() );
+        return this;
     }
 
     private void ResetIndex( Random random )
@@ -252,7 +253,7 @@ public class Cluster implements Comparable<Cluster>
                         .anyMatch( child -> child.Contains( cluster ) );
     }
 
-    private void RemoveSimpleNodes()
+    public Cluster RemoveSimpleNodes()
     {
         if( m_Clusters.size() == 1 )
         {
@@ -275,6 +276,28 @@ public class Cluster implements Comparable<Cluster>
                 cluster.RemoveSimpleNodes();
             }
         }
+        return this;
+    }
+
+    public Cluster Unroot()
+    {
+        if( m_Clusters.size() == 2 )
+        {
+            Cluster childA = m_Clusters.get( 0 );
+            Cluster childB = m_Clusters.get( 1 );
+
+            if( !childA.m_IsTerminal )
+            {
+                m_Clusters.remove( childA );
+                m_Clusters.addAll( childA.m_Clusters );
+            }
+            else if( !childB.m_IsTerminal )
+            {
+                m_Clusters.remove( childB );
+                m_Clusters.addAll( childB.m_Clusters );
+            }
+        }
+        return this;
     }
 
     @Override
