@@ -2,6 +2,7 @@ package pl.edu.pg.app.struct;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -35,6 +36,40 @@ public class Cluster implements Comparable<Cluster>
         }
     }
 
+    public static Cluster CopyOf( Cluster cluster )
+    {
+        Cluster newCluster = new Cluster( cluster.m_Id );
+        newCluster.m_Label = cluster.m_Label;
+        newCluster.m_IsTerminal = cluster.m_IsTerminal;
+
+        for( Cluster child : cluster.m_Clusters )
+        {
+            Cluster childCopy = CopyOf( child );
+            childCopy.m_Parent = newCluster;
+
+            newCluster.m_Clusters.add( childCopy );
+        }
+
+        return newCluster;
+    }
+
+    public Cluster ResetIndex()
+    {
+        // Generate new node indexes
+        ResetIndex( new Random() );
+        return this;
+    }
+
+    private void ResetIndex( Random random )
+    {
+        m_Id = random.nextInt();
+
+        for( Cluster child : m_Clusters )
+        {
+            child.ResetIndex( random );
+        }
+    }
+
     public void Add( Cluster cluster )
     {
         // Store reference to the parent cluster
@@ -46,8 +81,14 @@ public class Cluster implements Comparable<Cluster>
 
     public void Insert( Cluster cluster )
     {
+        // Cache for following filter calls
+        List<String> currentTreeTerminals = GetTerminals();
+
         // Find the most suitable place for new cluster
-        List<String> clusterTerminals = cluster.GetTerminals();
+        // Remove leaves which are not present in current tree
+        List<String> clusterTerminals = cluster.GetTerminalsStream()
+                .filter( currentTreeTerminals::contains )
+                .collect( Collectors.toList() );
 
         for( Cluster child : m_Clusters )
         {
@@ -69,6 +110,9 @@ public class Cluster implements Comparable<Cluster>
                 .collect( Collectors.toList() );
 
         m_Clusters.add( cluster );
+
+        // Node is not terminal anymore (if it was)
+        m_IsTerminal = false;
     }
 
     public void Remove( Cluster cluster )
@@ -77,11 +121,12 @@ public class Cluster implements Comparable<Cluster>
 
         if( GetTerminals().equals( clusterTerminals ) )
         {
-            assert (m_Parent != null);
-
-            // Move all child clusters to the parent
-            m_Parent.m_Clusters.addAll( m_Clusters );
-            m_Parent.m_Clusters.remove( this );
+            if( m_Parent != null )
+            {
+                // Move all child clusters to the parent
+                m_Parent.m_Clusters.addAll( m_Clusters );
+                m_Parent.m_Clusters.remove( this );
+            }
         }
         else
         {
@@ -95,9 +140,6 @@ public class Cluster implements Comparable<Cluster>
                 }
             }
         }
-
-        // Cluster not found?
-        assert( false );
     }
 
     public int GetId()
@@ -131,36 +173,77 @@ public class Cluster implements Comparable<Cluster>
         return allClusters;
     }
 
-    public boolean HasTerminal( int id )
+    public Cluster GetRootedAt( Cluster node )
     {
-        if( !m_IsTerminal )
+        if( node.m_Id == m_Id )
         {
-            return m_Clusters.stream()
-                    .anyMatch( cluster -> cluster.HasTerminal( id ) );
+            // Look at me...
+            // I'm the root now
+            Cluster newRoot = new Cluster( m_Id );
+            newRoot.m_Label = m_Label;
+            newRoot.m_IsTerminal = m_IsTerminal;
+            newRoot.m_Clusters.addAll( m_Clusters );
+
+            Cluster previous = newRoot;
+            Cluster previousParent = node;
+            Cluster parent = m_Parent;
+            while( parent != null )
+            {
+                Cluster newParent = new Cluster( parent.m_Id );
+                newParent.m_Clusters = new ArrayList<>( parent.m_Clusters );
+                newParent.m_Clusters.remove( previousParent );
+                newParent.m_Parent = previous;
+
+                previous.m_Clusters.add( newParent );
+
+                previous = newParent;
+                previousParent = parent;
+                parent = parent.m_Parent;
+            }
+
+            newRoot.RemoveSimpleNodes();
+
+            return newRoot;
         }
-        return id == m_Id;
+
+        // Early quit for terminal nodes
+        if( m_IsTerminal )
+        {
+            return null;
+        }
+
+        for( Cluster cluster : m_Clusters )
+        {
+            Cluster newRootedTree = cluster.GetRootedAt( node );
+
+            if( newRootedTree != null )
+            {
+                return newRootedTree;
+            }
+        }
+
+        return null;
     }
 
     public List<String> GetTerminals()
     {
-        if( !m_IsTerminal )
-        {
-            return m_Clusters.stream()
-                    .flatMap( Cluster::GetTerminalsStream )
-                    .sorted()
-                    .collect( Collectors.toList() );
-        }
-        return List.of( m_Label );
+        return GetTerminalsStream()
+                .collect( Collectors.toList() );
     }
 
     public Stream<String> GetTerminalsStream()
     {
-        if( !m_IsTerminal )
+        var terminals = m_Clusters.stream()
+                .flatMap( Cluster::GetTerminalsStream )
+                .collect( Collectors.toCollection( ArrayList::new ) );
+
+        if( m_IsTerminal )
         {
-            return m_Clusters.stream()
-                    .flatMap( Cluster::GetTerminalsStream );
+            terminals.add( m_Label );
         }
-        return Stream.of( m_Label );
+
+        return terminals.stream()
+                .sorted();
     }
 
     public boolean Contains( Cluster cluster )
@@ -168,6 +251,53 @@ public class Cluster implements Comparable<Cluster>
         return this.equals( cluster ) ||
                 m_Clusters.stream()
                         .anyMatch( child -> child.Contains( cluster ) );
+    }
+
+    public Cluster RemoveSimpleNodes()
+    {
+        if( m_Clusters.size() == 1 )
+        {
+            Cluster next = m_Clusters.get( 0 );
+
+            if( next.m_IsTerminal && !m_IsTerminal )
+            {
+                m_Label = next.m_Label;
+                m_IsTerminal = true;
+            }
+
+            m_Clusters = next.m_Clusters;
+
+            RemoveSimpleNodes();
+        }
+        else
+        {
+            for( Cluster cluster : m_Clusters )
+            {
+                cluster.RemoveSimpleNodes();
+            }
+        }
+        return this;
+    }
+
+    public Cluster Unroot()
+    {
+        if( m_Clusters.size() == 2 )
+        {
+            Cluster childA = m_Clusters.get( 0 );
+            Cluster childB = m_Clusters.get( 1 );
+
+            if( !childA.m_IsTerminal )
+            {
+                m_Clusters.remove( childA );
+                m_Clusters.addAll( childA.m_Clusters );
+            }
+            else if( !childB.m_IsTerminal )
+            {
+                m_Clusters.remove( childB );
+                m_Clusters.addAll( childB.m_Clusters );
+            }
+        }
+        return this;
     }
 
     @Override
@@ -203,7 +333,8 @@ public class Cluster implements Comparable<Cluster>
         {
             sb.append( m_Label );
         }
-        else
+
+        if( !m_Clusters.isEmpty() )
         {
             sb.append( '(' );
             sb.append( m_Clusters.stream()

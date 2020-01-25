@@ -10,31 +10,17 @@ import java.util.stream.Collectors;
 
 public class ConsensusFinder
 {
-    private float m_Threshold = 0.5f;
+    protected float m_Threshold = 0.5f;
+    protected List<String> m_TreeFilenames;
 
     public static void Execute( List<String> arguments )
     {
-        ConsensusFinder consensusFinder = new ConsensusFinder();
+        ConsensusError error = ConsensusError.SUCCESS;
+
+        float threshold = 0.5f;
+        boolean unrooted = false;
 
         // Process arguments and return unparsed list
-        arguments = consensusFinder.ParseArguments( arguments );
-
-        GraphToClusterConverter graphConverter = new GraphToClusterConverter();
-        List<Cluster> trees = arguments.parallelStream()
-                .map( GraphLoader::load )
-                .map( graphConverter::convert )
-                .collect( Collectors.toList() );
-
-        Cluster consensusTree = consensusFinder.FindConsensus( trees );
-
-        System.out.println( "Consensus tree: " + consensusTree );
-
-        // Display consensus tree
-        new ClusterToGraphConverter().Convert( consensusTree ).display();
-    }
-
-    private List<String> ParseArguments( List<String> arguments )
-    {
         boolean allArgumentsProcessed = false;
 
         ListIterator<String> argumentIterator = arguments.listIterator();
@@ -43,30 +29,107 @@ public class ConsensusFinder
             switch( argumentIterator.next() )
             {
                 case "-threshold":
-                    m_Threshold = Float.parseFloat( argumentIterator.next() );
+                    threshold = Float.parseFloat( argumentIterator.next() );
                     break;
 
                 case "-strict":
-                    m_Threshold = 1.0f;
+                    threshold = 1.0f;
+                    break;
+
+                case "-unrooted":
+                    unrooted = true;
                     break;
 
                 default:
+                    // Move iterator back - argument was not processed
+                    argumentIterator.previous();
                     allArgumentsProcessed = true;
                     break;
             }
         }
 
-        // Return unprocessed arguments
-        return arguments.subList( argumentIterator.nextIndex(), arguments.size() );
+        if( threshold < 0.5 || threshold > 1.0 )
+        {
+            error = ConsensusError.ERROR_INVALID_THRESHOLD;
+        }
+
+        // Create the finder instance
+        ConsensusFinder consensusFinder = null;
+
+        if( error == ConsensusError.SUCCESS )
+        {
+            if( unrooted )
+            {
+                // Handle unrooted trees
+                consensusFinder = new UnrootedConsensusFinder();
+            }
+            else
+            {
+                // Handle rooted trees
+                consensusFinder = new ConsensusFinder();
+            }
+
+            // Update config
+            consensusFinder.m_Threshold = threshold;
+            consensusFinder.m_TreeFilenames = arguments.subList( argumentIterator.nextIndex(), arguments.size() );
+        }
+
+        // Load trees
+        List<Cluster> trees = null;
+
+        if( error == ConsensusError.SUCCESS )
+        {
+            GraphToClusterConverter graphConverter = new GraphToClusterConverter();
+
+            trees = consensusFinder.m_TreeFilenames.parallelStream()
+                    .map( GraphLoader::load )
+                    .map( graphConverter::convert )
+                    .collect( Collectors.toList() );
+
+            error = ValidateTrees( trees );
+        }
+
+        if( error == ConsensusError.SUCCESS )
+        {
+            Cluster consensusTree = consensusFinder.FindConsensus( trees );
+
+            System.out.println( "Consensus tree: " + consensusTree );
+
+            // Display consensus tree
+            new ClusterToGraphConverter().Convert( consensusTree ).display();
+        }
+
+        System.out.println( error );
     }
 
-    private Cluster FindConsensus( List<Cluster> trees )
+    private static ConsensusError ValidateTrees( List<Cluster> trees )
+    {
+        // At least one tree must be specified
+        if( trees.isEmpty() )
+        {
+            return ConsensusError.ERROR_EMPTY_SET;
+        }
+
+        List<String> referenceLeaves = trees.get( 0 ).GetTerminals();
+
+        for( Cluster tree : trees )
+        {
+            // Each tree must define the same leaves
+            if( !referenceLeaves.equals( tree.GetTerminals() ) )
+            {
+                return ConsensusError.ERROR_LEAF_SET_MISMATCH;
+            }
+        }
+
+        return ConsensusError.SUCCESS;
+    }
+
+    protected Cluster FindConsensus( List<Cluster> trees )
     {
         Map<Cluster, Integer> counts = CountClusters( trees );
         Map<Cluster, Float> shares = ComputeShares( counts, trees.size() );
 
-        // TODO: Create copy?
-        Cluster consensusTree = trees.get( 0 );
+        Cluster consensusTree = Cluster.CopyOf( trees.get( 0 ) );
 
         // Reconstruct the tree using only clusters with share above the threshold
         shares.entrySet().stream()
@@ -91,7 +154,7 @@ public class ConsensusFinder
         return consensusTree;
     }
 
-    private Map<Cluster, Integer> CountClusters( List<Cluster> trees )
+    protected Map<Cluster, Integer> CountClusters( List<Cluster> trees )
     {
         List<Cluster> candidateTrees = trees.subList( 1, trees.size() );
         List<Cluster> candidateClusters = trees.get( 0 ).GetAllClusters();
@@ -129,7 +192,7 @@ public class ConsensusFinder
         return counts;
     }
 
-    private Map<Cluster, Float> ComputeShares( Map<Cluster, Integer> counts, int numTrees )
+    protected Map<Cluster, Float> ComputeShares( Map<Cluster, Integer> counts, int numTrees )
     {
         Map<Cluster, Float> shares = new HashMap<>();
 
