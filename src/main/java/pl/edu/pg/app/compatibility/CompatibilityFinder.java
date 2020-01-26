@@ -16,35 +16,8 @@ public class CompatibilityFinder
 
     public static void Execute( List<String> arguments )
     {
-        CompatibilityFinder compatibilityFinder = CreateCompatibilityFinder( arguments );
+        CompatibilityError error = CompatibilityError.SUCCESS;
 
-        GraphToClusterConverter graphConverter = new GraphToClusterConverter();
-        List<Cluster> trees = compatibilityFinder.m_TreeFilenames.parallelStream()
-                .map( GraphLoader::load )
-                .map( graphConverter::convert )
-                .collect( Collectors.toList() );
-
-        List<List<Cluster>> treeClusters = trees.stream()
-                .map( Cluster::GetAllClusters )
-                .collect( Collectors.toList() );
-
-        Cluster compatibleTree = compatibilityFinder.FindCompatibleTree( trees, treeClusters );
-
-        if( compatibleTree != null )
-        {
-            System.out.println( "Compatible tree: " + compatibleTree );
-
-            // Display compatible tree
-            new ClusterToGraphConverter().Convert( compatibleTree ).display();
-        }
-        else
-        {
-            System.out.println( "Trees incompatible" );
-        }
-    }
-
-    private static CompatibilityFinder CreateCompatibilityFinder( List<String> arguments )
-    {
         boolean unrooted = false;
 
         // Process arguments and return unparsed list
@@ -68,26 +41,72 @@ public class CompatibilityFinder
         }
 
         // Create the finder instance
-        CompatibilityFinder compatibilityFinder;
+        CompatibilityFinder compatibilityFinder = null;
 
-        if( unrooted )
+        if( error == CompatibilityError.SUCCESS )
         {
-            // Handle unrooted trees
-            compatibilityFinder = new UnrootedCompatibilityFinder();
+            if( unrooted )
+            {
+                // Handle unrooted trees
+                compatibilityFinder = new UnrootedCompatibilityFinder();
+            }
+            else
+            {
+                // Handle rooted trees
+                compatibilityFinder = new CompatibilityFinder();
+            }
+
+            // Update config
+            compatibilityFinder.m_TreeFilenames = arguments.subList( argumentIterator.nextIndex(), arguments.size() );
         }
-        else
+
+        // Load trees
+        List<Cluster> trees = null;
+
+        if( error == CompatibilityError.SUCCESS )
         {
-            // Handle rooted trees
-            compatibilityFinder = new CompatibilityFinder();
+            GraphToClusterConverter graphConverter = new GraphToClusterConverter();
+
+            trees = compatibilityFinder.m_TreeFilenames.parallelStream()
+                    .map( GraphLoader::load )
+                    .map( graphConverter::convert )
+                    .collect( Collectors.toList() );
         }
 
-        // Update config
-        compatibilityFinder.m_TreeFilenames = arguments.subList( argumentIterator.nextIndex(), arguments.size() );
+        // Find compatible tree
+        Cluster compatibleTree = null;
 
-        return compatibilityFinder;
+        if( error == CompatibilityError.SUCCESS )
+        {
+            compatibleTree = compatibilityFinder.FindCompatibleTree( trees );
+
+            if( compatibleTree == null )
+            {
+                error = CompatibilityError.ERROR_TREES_INCOMPATIBLE;
+            }
+        }
+
+        if( error == CompatibilityError.SUCCESS )
+        {
+            System.out.println( "Compatible tree: " + compatibleTree );
+
+            // Display compatible tree
+            new ClusterToGraphConverter().Convert( compatibleTree ).display();
+        }
+
+        System.out.println( error );
     }
 
-    protected Cluster FindCompatibleTree( List<Cluster> nodes, List<List<Cluster>> treeClusters )
+    protected Cluster FindCompatibleTree( List<Cluster> trees )
+    {
+        List<List<Cluster>> clusters = trees.stream()
+                .map( Cluster::GetAllClusters )
+                .collect( Collectors.toList() );
+
+        return FindCompatibleTreeRec( trees, clusters );
+    }
+
+    protected Cluster FindCompatibleTreeRec( List<Cluster> nodes, List<List<Cluster>> treeClusters )
     {
         // Implementation of BuildST from
         // https://arxiv.org/pdf/1510.07758.pdf
@@ -142,7 +161,7 @@ public class CompatibilityFinder
         for( List<Cluster> component : connectedComponents )
         {
             // Call recursively for each connected component
-            Cluster subtreeCompatibilityTree = FindCompatibleTree( component, treeClusters );
+            Cluster subtreeCompatibilityTree = FindCompatibleTreeRec( component, treeClusters );
 
             if( subtreeCompatibilityTree != null )
             {

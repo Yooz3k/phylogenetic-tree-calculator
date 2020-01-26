@@ -1,6 +1,7 @@
 package pl.edu.pg.app.consensus;
 
 import com.google.common.collect.Lists;
+import pl.edu.pg.app.converter.UnrootedAlgorithm;
 import pl.edu.pg.app.struct.Cluster;
 
 import java.util.Comparator;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class UnrootedConsensusFinder extends ConsensusFinder
+    implements UnrootedAlgorithm
 {
     @Override
     protected Cluster FindConsensus( List<Cluster> trees )
@@ -25,13 +27,5 @@ public class UnrootedConsensusFinder extends ConsensusFinder
                 .RemoveSimpleNodes()
                 .Unroot()
                 .ResetIndex();
-    }
-
-    private List<Cluster> ShuffleTree( Cluster tree )
-    {
-        return tree.GetAllClusters().stream()
-                .filter( cluster -> !cluster.IsTerminal() )
-                .map( tree::GetRootedAt )
-                .collect( Collectors.toList() );
     }
 }
